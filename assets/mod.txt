@@ -1,13 +1,13 @@
 [ModMeta]
 schema=1
-name=Signalisation française réaliste - textures C++
+name=Signalisation française réaliste - Kotlin
 author=Sami
-desc=Textures BAL type A pour le module C++. Aucun script.
-version=0.1.0
+desc=Signalisation BAL type A en Kotlin. Integration native geree par le SDK.
+version=0.2.0
 
 [SignalTextures]
 id=sfr_bal_a_cpp_v1
-name_en=SFR - BAL semaphore type A (essais C++)
+name_en=SFR - BAL semaphore type A (Kotlin)
 name_loc=sfr_bal_a_cpp_v1_name
 state=imgs/ca/sem_bal/tex00.svg
 state=imgs/ca/sem_bal/tex01.svg
@@ -18,11 +18,12 @@ state=imgs/ca/sem_bal/tex05.svg
 state=imgs/ca/sem_bal/tex06.svg
 state=imgs/ca/sem_bal/tex07.svg
 state=imgs/ca/sem_bal/tex08.svg
+state=imgs/ca/sem_bal/tex09.svg
 state=imgs/ca/sem_bal/tex10.svg
 state=imgs/ca/sem_bal/xx.svg
 
 [SignalTemplate]
-name_en=SFR - BAL type A (essais C++)
+name_en=SFR - BAL type A (Kotlin)
 name_loc=sfr_bal_a_cpp_v1_template
 kind=path
 textures=sfr_bal_a_cpp_v1

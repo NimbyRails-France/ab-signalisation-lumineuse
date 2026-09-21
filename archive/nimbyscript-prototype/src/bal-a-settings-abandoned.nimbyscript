@@ -1,0 +1,54 @@
+script meta {
+    lang: nimbyscript.v1,
+    api: nimbyrails.v1,
+}
+
+// Déclaration de l'interface native uniquement, sans logique BAL dupliquée.
+// Le SDK lit ces valeurs par signal ; BalRules les associe à SignalSettings.
+// La compilation et la modification des cases restent à valider dans le jeu.
+// Conserver les noms du type et des champs : le jeu les utilise pour retrouver
+// la configuration enregistrée dans les sauvegardes.
+pub struct ReglagesBalSemaphoreA extend Signal {
+    meta { label: "SFR - BAL semaphore A", },
+
+    active: bool meta {
+        label: "Activer le BAL automatique",
+        description: "Autorise le module C++ a calculer les indications de ce signal.",
+        default: false,
+    },
+    greenFlash: bool meta {
+        label: "Equipement : vert clignotant",
+        description: "Le panneau peut presenter cette indication ; ne force pas son affichage.",
+        default: false,
+    },
+    yellowFlash: bool meta {
+        label: "Equipement : jaune clignotant",
+        description: "Le panneau peut presenter l'annonce a distance reduite.",
+        default: false,
+    },
+    redFlash: bool meta {
+        label: "Equipement : rouge clignotant",
+        description: "Equipement seulement ; son emploi demande aussi une condition etablie.",
+        default: false,
+    },
+    preannouncement: bool meta {
+        label: "Installation avec preannonce",
+        description: "Emploi du vert clignotant selon l'indication aval et les regles BAL.",
+        default: false,
+    },
+    reducedAnnouncement: bool meta {
+        label: "Annonce a distance reduite",
+        description: "Caracteristique declaree de l'installation ; le SDK ne la deduit pas de la pente.",
+        default: false,
+    },
+    work160: bool meta {
+        label: "Situation de travaux 160 active",
+        description: "Situation explicite du scenario, pas une detection automatique de TIV. Requiert le vert clignotant.",
+        default: false,
+    },
+    redFlashUseDeclared: bool meta {
+        label: "Installation autorisant le rouge clignotant",
+        description: "Ne suffit pas a commander le rouge clignotant : sa condition d'emploi doit etre observee.",
+        default: false,
+    },
+}

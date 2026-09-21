@@ -1,32 +1,52 @@
-# Architecture et étapes
+﻿# Architecture du plugin
 
-## Frontières
+Signalisation française réaliste est un mod Kotlin/Native pour NIMBY Rails,
+chargé par NRF Loader et raccordé au jeu par l'API Kotlin du SDK NRF.
 
-Le mod actuel est limité aux actions d'affichage et de restauration des textures.
-`src/mod.cpp` déclare ces actions ; l'adaptateur du SDK 0.7.2 fournit les exports
-et le cycle de vie de la DLL. Le Hub 0.2.3 installe le paquet et enregistre
-`SignalisationFrancaiseRealisteMod.dll` auprès de NRF Loader. Les étapes ci-dessous
-décrivent la suite envisagée, pas des règles françaises déjà implémentées.
+## Organisation
 
-- **SDK commun** : observation native, topologie orientée, connexions d'aiguilles, états et textures. Toute correction de lecture du jeu doit y être réalisée pour tous ses consommateurs.
-- **Adaptateur** : convertir les observations en données métier, préserver les inconnues, identifier les changements de partie, invalider les données anciennes.
-- **Moteur français** : calcul indépendant de l'affichage et de la ville ; configuration des équipements et des règles par installation, avec explication de chaque décision.
-- **Présentation** : associer une indication calculée à un état de texture configuré. Un index de texture n'est pas une règle ferroviaire.
-- **Diagnostic** : voir le signal, le chemin considéré, le train concerné, les observations manquantes et la raison de l'indication.
+- `src/main/kotlin/Entry.kt` crée le mod.
+- `sfr/FrenchSignalsMod.kt` déclare le mod et convertit les données entre
+  l'API du SDK et les types métier du plugin.
+- `sfr/settings` définit les équipements et les cases de réglage des signaux.
+- `sfr/signalling` calcule les indications BAL et les motifs des décisions.
+- `sfr/rendering` associe les indications aux textures et au clignotement.
+- `sfr/driving` définit les consignes françaises, les contraintes, le modèle
+  de freinage et les mémoires de conduite.
 
-## Ordre de développement proposé
+Ces chemins `sfr/` sont relatifs à `src/main/kotlin/`.
 
-1. Inventaire observable et fixtures de capture à produire avec les outils du SDK. Le CLI du mod a été retiré ; il reste à enregistrer la topologie, les réservations détaillées et leur chronologie pour le rejeu.
-2. Établir quelles données permettent de distinguer un chemin possible, un itinéraire demandé et un itinéraire effectivement établi. Une ligne ou une destination commerciale ne prouve pas à elle seule le chemin engagé.
-3. Définir un premier périmètre de signalisation, documenter ses règles avec des sources françaises de référence, puis construire des scénarios vérifiables avant le calcul des aspects.
-4. Ajouter les annonces, restrictions de vitesse, TIV mobiles et indicateurs de direction progressivement, en fonction des informations d'itinéraire réellement disponibles.
-5. Le catalogue de textures et le forçage visuel C++ expérimental existent maintenant pour des signaux indépendants stockés dans une table extensible. Valider le mapping des aspects et tester le rendu simultané en jeu. Cette substitution de rendu ne commande pas les autorisations de circulation.
-6. Tester les croisements, voies uniques, bifurcations, dépôts, changements de ligne, de sens, d'heure et de partie, dans plusieurs réseaux.
+## Responsabilités du SDK et du plugin
 
-## Points à établir avant les règles
+Le SDK fournit l'intégration native, les observations du jeu, le panneau des
+réglages et la publication des consignes. Le plugin définit les règles BAL,
+les indications, les équipements et les limites de conduite françaises.
+Les observations absentes, périmées ou invalides sont représentées explicitement
+dans les décisions ; une texture seule ne constitue pas une autorisation.
 
-Les réservations observées ne doivent pas être assimilées automatiquement à un enclenchement complet. Vérifier leur orientation, leur durée de validité et leur relation au train. L'occupation, la libération, l'immobilisation des aiguilles, les exceptions applicables au train et les commandes d'aspect restent à caractériser selon les capacités du SDK.
+Les identifiants `sfr.bal-a` et `sfr_bal_a_cpp_v1` restent stables pour les
+sauvegardes existantes, même si le code du plugin est désormais en Kotlin.
 
-L'état initial du moteur est « indéterminé ». Il ne déduit pas une indication française d'un aspect natif numérique, d'un nom de ligne ou d'une texture sans mapping validé. Les règles simplifiées du visualiseur de graphe, notamment le passage d'un NoWay dès qu'il possède une exception, ne constituent pas des règles d'autorisation pour un train.
+## Compilation et ressources
 
-Les schémas de gare servent de tests de non-régression ; aucun nom de ville ni ID de signal ne doit être une condition dans les algorithmes communs.
+Gradle compile le code Kotlin, exécute les tests de `src/test/kotlin` et prépare
+les paquets. Le plugin est livré avec son adaptateur natif précompilé et sa DLL
+Kotlin. `assets/mod.txt`, `imgs/` et `config/` fournissent les ressources.
+
+Le plugin Gradle du SDK fournit toute la logique de compilation et de paquet.
+Le Hub assure l'installation et le choix entre projet local et version publiée.
+Les [releases multiplateformes](releases.md) séparent version, canal alpha/bêta/
+stable et système/architecture ; chaque plateforme possède son manifeste.
+Le dossier local `tools/`, ignoré par Git, est réservé aux relevés et analyses
+ponctuels ; il ne fait pas partie du projet distribué.
+
+Consulter le [guide Gradle](gradle-intellij.md) et le
+[guide Kotlin](kotlin-development.md) pour les commandes et les sorties.
+
+Les essais graphiques Linux sous WSL sont décrits dans le
+[relevé Vulkan WSL](wsl-vulkan.md). Le rendu Vulkan sur RTX et l'affichage du menu
+du jeu par lancement natif direct y sont vérifiés. Une copie de partie atteint
+également la carte après contournement d'un défaut de lecture des textures.
+Cela ne valide pas encore le portage Linux complet du SDK ni la stabilité longue.
+Le [relevé de migration multiplateforme](migration-multiplateforme.md) précise
+les tests effectués et le travail restant pour une distribution complète.

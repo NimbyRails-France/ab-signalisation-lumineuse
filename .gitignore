@@ -1,4 +1,6 @@
 /build/
+/.gradle/
+/.kotlin/
 /captures/
 /.idea/
 /CMakeUserPresets.json
@@ -8,3 +10,9 @@ __pycache__/
 *.pyc
 desktop.ini
 Thumbs.db
+
+# Notes de travail et comptes rendus des essais locaux
+/local-notes/
+
+# Outils locaux d'analyse et de capture, jamais requis par le projet
+/tools/
