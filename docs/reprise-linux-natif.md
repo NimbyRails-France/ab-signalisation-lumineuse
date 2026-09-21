@@ -72,6 +72,12 @@ tests déjà exécutés sur la nouvelle installation Linux.
 5. Valider installation, mise à niveau, retrait et récupération sur chaque OS,
    puis remettre les documentations en cohérence avant toute publication.
 
+Les politiques de versionnement présentes sur GitHub ont été fusionnées avec
+ce point de reprise. Les anciens pipelines Woodpecker du mod et du TCO restent
+à adapter à Gradle ; leurs commandes CMake historiques ne valident pas la
+migration Kotlin. Les commits de fusion portent `[skip ci]` et ne demandent
+aucune publication. Les nouveaux numéros de version restent en préparation.
+
 Sous WSL, des lanceurs graphiques et un contournement de lecture de dossiers
 étaient nécessaires. Ne pas les installer automatiquement sur Ubuntu natif :
 reproduire d'abord le comportement avec Steam et les pilotes Linux normaux.
