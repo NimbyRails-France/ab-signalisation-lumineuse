@@ -16,3 +16,11 @@ Thumbs.db
 
 # Outils locaux d'analyse et de capture, jamais requis par le projet
 /tools/
+# Isolated CI dependencies
+.ci/
+
+.release-plan.json
+
+dist/
+
+nrf-package-*/
