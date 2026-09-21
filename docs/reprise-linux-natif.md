@@ -68,14 +68,17 @@ tests déjà exécutés sur la nouvelle installation Linux.
    Un objet compilé ou une lecture réussie par le TCO ne prouve pas que le mod agit.
 3. Tester le mod chargé dans le jeu, ses réglages, sa persistance et sa stabilité.
 4. Tester le lancement des profils depuis le Hub et compléter la parité du TCO,
-   notamment son mécanisme de mise à jour autonome.
+   notamment son mécanisme de mise à jour autonome. Les anciennes sources Qt
+   ont été retirées ; leur historique reste dans Git. Les exemples SDK sont
+   désormais Kotlin (`kotlin-mod` et `kotlin-observer`).
 5. Valider installation, mise à niveau, retrait et récupération sur chaque OS,
    puis remettre les documentations en cohérence avant toute publication.
 
 Les politiques de versionnement présentes sur GitHub ont été fusionnées avec
-ce point de reprise. Les anciens pipelines Woodpecker du mod et du TCO restent
-à adapter à Gradle ; leurs commandes CMake historiques ne valident pas la
-migration Kotlin. Les commits de fusion portent `[skip ci]` et ne demandent
+ce point de reprise. Le pipeline Woodpecker du mod reste à adapter à Gradle ;
+ses commandes CMake historiques ne valident pas la migration Kotlin. Celui du
+TCO exécute désormais ses tests Kotlin, sans publication automatique.
+Les commits de fusion portent `[skip ci]` et ne demandent
 aucune publication. Les nouveaux numéros de version restent en préparation.
 
 Sous WSL, des lanceurs graphiques et un contournement de lecture de dossiers
