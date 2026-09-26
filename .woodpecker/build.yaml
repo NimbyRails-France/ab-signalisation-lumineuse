@@ -1,4 +1,4 @@
-# Verify and package every commit; only an explicit release subject publishes.
+# The VPS builds Windows packages; publication requires an explicit release commit.
 labels:
   pool: general
 concurrency: 1
@@ -9,7 +9,6 @@ steps:
     image: univenanne-ci-nimby-release:20260918
     commands:
       - sh .woodpecker/build.sh
-      - python3 .woodpecker/package.py
   - name: publish-release
     image: univenanne-ci-nimby-publisher:20260918
     settings:

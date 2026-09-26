@@ -35,7 +35,16 @@ internal fun testNetworkAndInstructions() {
     val red = signal(1,block=Occupancy.Occupied).copy(settings=SignalSettings(active=true,redFlash=true,redFlashUseDeclared=true,redFlashConditionActive=true).asMap())
     expect(mod.decide(mod.fromLive(red),null)?.indication == Aspect.RedFlash)
     val instruction = DrivingInstructions.fromDecision(SignalDecision(Aspect.YellowFlash,Reason.ReducedAnnouncement))!!
-    expect(instruction.signalsAhead == 2 && instruction.flags == setOf(DrivingFlag.FollowTarget,DrivingFlag.CancelAtNextClear))
+    expect(instruction.signalsAhead == 2 && instruction.flags == setOf(DrivingFlag.FollowTarget,DrivingFlag.CancelAtNextClear,DrivingFlag.ApproachPassable))
+    val warning = DrivingInstructions.fromDecision(SignalDecision(Aspect.A,Reason.StopAnnouncement))!!
+    expect(warning.signalsAhead == 1 && warning.reopenedSpeedMps == 30.0/3.6)
+    expect(warning.flags == setOf(DrivingFlag.FollowTarget,DrivingFlag.ApproachPassable))
+    // The generic API has no BAL speed; a consumer supplies its own policy.
+    expect(DrivingRule().reopenedSpeedMps == 0.0)
+    expect(AutomaticDriving.announceStop(1,17.0/3.6,passableHere=false).reopenedSpeedMps == 17.0/3.6)
+    rejected { AutomaticDriving.announceStop(1,Double.NaN,passableHere=true) }
+    rejected { AutomaticDriving.announceStop(1,10.0,passableHere=true,cancelAtNextClear=true) }
+    rejected { AutomaticDriving.restrictedUntilNextSignal(10.0,5.0,stopFirst=false) }
     expect(DrivingInstructions.fromDecision(SignalDecision(Aspect.S,Reason.BlockOccupied))!!.flags == setOf(DrivingFlag.Stop,DrivingFlag.OnSight,DrivingFlag.StopThenProceed))
     expect(DrivingInstructions.fromDecision(SignalDecision(Aspect.S,Reason.ForcedStop))!!.flags == setOf(DrivingFlag.Stop))
     expect(DrivingInstructions.fromDecision(SignalDecision(Aspect.S,Reason.RouteUnknown))!!.flags == setOf(DrivingFlag.Stop))

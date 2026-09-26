@@ -6,7 +6,7 @@ La compilation, les vérifications natives et le paquet sont définis côté SDK
 ## Première ouverture
 
 1. Installer un JDK 21 et le sélectionner comme **Gradle JVM**.
-2. Extraire le kit SDK Kotlin 0.7.3 pour Windows x64.
+2. Extraire le kit SDK Kotlin 0.8.0 pour Windows x64.
 3. Configurer `NRF_KOTLIN_SDK`, ou renseigner `nrfSdkDir=C:/SDK/NimbyKotlin`
    dans `%USERPROFILE%/.gradle/gradle.properties`.
 4. Ouvrir `build.gradle.kts` comme projet, avec le Wrapper Gradle.

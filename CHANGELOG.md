@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.1] - 2026-09-27
+
+### Windows alpha
+- Mod SFR écrit en Kotlin/Native avec le kit SDK 0.8.0-alpha.1.
+- Règles BAL et vitesses définies dans le mod ; commande et observation génériques fournies par le SDK.
+- Corrections des annonces, réouvertures et restrictions conservées jusqu'au franchissement approprié.
+- Journaux de chargement, réglages, anomalies et erreurs Kotlin avec diagnostic détaillé.
+- Nécessite le SDK 0.8.0-alpha.1 et un jeu reconnu par le SDK. Recette complète en jeu à effectuer.
+- Distribution Windows uniquement ; Linux suspendu.
+
 ## [0.1.0] - 2026-09-18
 
 ### Première version expérimentale

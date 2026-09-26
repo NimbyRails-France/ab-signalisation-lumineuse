@@ -43,6 +43,23 @@ internal class FrenchSignalsMod : SignallingMod() {
     override fun texture(decision: Decision, simulationMs: Long, halfPeriodMs: Long) =
         SignalTextures.path(decision.toBal().aspect, simulationMs, halfPeriodMs)
 
+    // Codes du mod seulement. S force un arret absolu ; la permission
+    // apres arret reste reservee a une occupation reellement observee.
+    override fun forcedDecision(aspect: Int): Decision? {
+        val value = Aspect.entries.getOrNull(aspect) ?: return null
+        val reason = when (value) {
+            Aspect.Unknown -> Reason.MissingObservation
+            Aspect.Inactive -> Reason.Inactive
+            Aspect.S -> Reason.ForcedStop
+            Aspect.A -> Reason.StopAnnouncement
+            Aspect.YellowFlash -> Reason.Preannouncement
+            Aspect.GreenFlash -> Reason.Work160
+            Aspect.RedFlash -> Reason.ReducedAnnouncement
+            Aspect.VL -> Reason.Clear
+        }
+        return decision(value, reason)
+    }
+
     override fun drivingRule(decision: Decision) = DrivingInstructions.fromDecision(decision.toBal())
     override fun isFault(decision: Decision) = decision.toBal().aspect == Aspect.Unknown
     override fun isActive(decision: Decision) = decision.toBal().aspect != Aspect.Inactive

@@ -60,3 +60,19 @@ Un commit ordinaire lance les vérifications sans publier. Pour publier, prépar
 Le titre exact du commit de publication est `release X.Y.Z` (exemple : alpha : `release 0.4.0-alpha.1` ; beta : `release 0.4.0-beta.1`). Poussez ce commit sur la branche du canal choisi. La compilation, les tests et la préparation des téléchargements doivent réussir avant la publication GitHub et son annonce Discord. Une version déjà publiée ne peut pas être remplacée : choisissez un nouveau numéro.
 
 Ne créez pas le tag à la main. Les préversions restent dans leur canal et ne remplacent pas la version stable.
+
+
+## Logs de production
+
+Le Hub propose **Téléchargements → Exporter les logs NRF** : un ZIP local
+regroupe les journaux du Hub, du SDK/chargeur, des mods, du TCO et du banc,
+ainsi qu'un résumé des versions. Aucun envoi automatique, aucune sauvegarde de
+jeu ni fichier de réglages n'est inclus. Les logs peuvent contenir des chemins
+personnels et des identifiants d'objets.
+
+Les composants Windows écrivent sous `%LOCALAPPDATA%/NimbyRailsFrance/logs`,
+chacun dans son dossier ; le Hub utilise `%LOCALAPPDATA%/NimbyRailsFrance/logs/hub`.
+Rotation et regroupement des erreurs répétées limitent le volume. Le TCO et le
+banc disposent aussi d'un bouton pour ouvrir leurs journaux.
+Voir [le contrat de diagnostic](../sdk/docs/production-diagnostics.md) pour les
+emplacements, la rétention, les tests et les limites en cas de crash natif.
