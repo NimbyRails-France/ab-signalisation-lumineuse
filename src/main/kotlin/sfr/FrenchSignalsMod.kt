@@ -3,6 +3,7 @@ package sfr
 import nimby.*
 import nimby.mod.modInfo
 import sfr.signals.bal.BalSignals
+import sfr.signals.bal.BalWorkZone
 import sfr.signals.carreavertissement.CarreAvertissement
 
 /** Composition du paquet : ajouter les modèles ici. Chaque modèle possède
@@ -13,4 +14,5 @@ internal fun FrenchSignalsMod(): SignallingMod = signalMod(modInfo) {
     diagnosticFile = "sfr-faults.jsonl"
     signal(BalSignals.model)
     signal(CarreAvertissement.model)
+    prepareNetwork(BalWorkZone::apply)
 }

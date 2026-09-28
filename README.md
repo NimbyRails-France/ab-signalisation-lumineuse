@@ -17,6 +17,18 @@ L'intégration du nouveau panneau reste à qualifier en jeu.
 
 ## Organisation et responsabilités
 
+### Zone de travaux et construction
+
+Dans un BAL, cocher **Vert CLI Travaux** fait apparaître **Nombre de cantons travaux suivants** (0 à 64).
+Avec 2, le BAL sélectionné et les deux BAL suivants sont couverts. Avec 0, seul le BAL sélectionné l'est.
+Un arrêt, une occupation ou une annonce plus restrictive restent prioritaires. La propagation suit les liens aval connus et s'arrête sur un autre modèle, une liaison manquante ou une observation indisponible.
+Les réglages des BAL suivants ne sont pas réécrits : décocher la source ou réduire le nombre recalcule immédiatement sa couverture. Les zones qui se chevauchent se combinent.
+
+Les nouveaux BAL et Carré sont déclarés en taille **4**, à **gauche dans le sens de circulation**, avec le SDK 0.8.0-alpha.7.
+Les signaux existants conservent leurs propriétés ; Répéter conserve celles du signal copié.
+
+### Sources
+
 L'identité vient de `mod.json` via `nimby.mod.modInfo`. `FrenchSignalsMod`
 déclare l'auteur et la description ; chaque modèle déclare `construction` avec
 le catalogue ordonné de son fichier `Textures`. Le plugin génère `mod.txt` au

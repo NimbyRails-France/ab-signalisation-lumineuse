@@ -14,8 +14,9 @@ internal object BalSignals {
         fallback = BalDecision(BalAspect.Unknown, BalReason.MissingObservation),
         invalidNetwork = BalDecision(BalAspect.Unknown, BalReason.InvalidTopology)
     ) {
+        number(BalPanel.workBlocks)
         construction(BalTextures.catalogue, name = tr("bal.construction"),
-            catalogueName = tr("bal.catalogue"))
+            catalogueName = tr("bal.catalogue"), size = 4, left = true)
         offerSignalPlacement()
         evaluate { settings, observation, next ->
             BalRules.evaluate(BalSettings.from(settings), observation, next)

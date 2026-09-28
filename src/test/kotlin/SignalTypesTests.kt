@@ -28,7 +28,8 @@ class SignalTypesTests {
         // C++ identifier. It must not accidentally restore a retired model.
         assertEquals(listOf("sfr_bal_a_v1", "sfr_cs_a_v1"), mod.signalTypes.map { it.textureSet })
         assertEquals(listOf("greenFlashBlock", "greenFlashWork", "yellowFlashEnabled", "redFlashEnabled"),
-            mod.signalTypes[0].checkboxes.map { it.name })
+            mod.signalTypes[0].checkboxes.take(4).map { it.name })
+        assertEquals(listOf(BalPanel.workBlocks), mod.signalTypes[0].numbers)
         assertTrue(mod.signalTypes[0].checkboxes.all { !it.defaultValue && !it.onlyWhenEnabled })
         assertTrue(mod.signalTypes[1].checkboxes.single().defaultValue)
         assertTrue(mod.signalTypes[1].observeApproach)
@@ -104,7 +105,7 @@ class SignalTypesTests {
 
     @Test fun currentSettingsRoundTripWithoutAnyMigration() {
         for (mask in 0 until 16) {
-            val values = mod.signalTypes.first().checkboxes.mapIndexed { i, box ->
+            val values = BalPanel.checkboxes.mapIndexed { i, box ->
                 box.name to (mask and (1 shl i) != 0)
             }.toMap()
             assertEquals(values, BalSettings.from(values).asMap())

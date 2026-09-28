@@ -7,7 +7,7 @@
       "bal.greenBlock": "Vert CLI Cantonnement",
       "bal.greenBlock.help": "Active la préannonce selon l’indication du signal suivant.",
       "bal.greenWork": "Vert CLI Travaux",
-      "bal.greenWork.help": "Active le vert clignotant de travaux lorsque les indications plus restrictives ne s’imposent pas.",
+      "bal.greenWork.help": "Active le vert clignotant de travaux sur ce canton et le nombre de cantons BAL suivants indiqué (0 à 64). Les indications plus restrictives restent prioritaires. Le parcours s’arrête si la suite est inconnue ou sort du BAL.",
       "bal.yellow": "Jaune CLI",
       "bal.yellow.help": "Active l’annonce à distance réduite selon le signal suivant.",
       "bal.red": "Rouge CLI",
@@ -19,7 +19,8 @@
       "bal.catalogue": "SFR — Sémaphore BAL type A",
       "carre.construction": "SFR — Carré simple Avertissement",
       "carre.title": "Carré simple Avertissement",
-      "placement.repeat": "Répéter ce signal"
+      "placement.repeat": "Répéter ce signal",
+      "bal.workBlocks": "Nombre de cantons travaux suivants"
     },
     "en": {
       "mod.name": "Realistic French signalling",
@@ -27,7 +28,7 @@
       "bal.greenBlock": "Flashing green — block signalling",
       "bal.greenBlock.help": "Enable advance warning based on the next signal aspect.",
       "bal.greenWork": "Flashing green — works",
-      "bal.greenWork.help": "Enable flashing green for works when a more restrictive aspect is not required.",
+      "bal.greenWork.help": "Enable works flashing green for this block and the specified number of following BAL blocks (0–64). More restrictive aspects take precedence. Coverage stops at unknown links or non-BAL signals.",
       "bal.yellow": "Flashing yellow",
       "bal.yellow.help": "Enable short-distance warning based on the next signal.",
       "bal.red": "Flashing red",
@@ -39,7 +40,8 @@
       "bal.catalogue": "SFR — BAL semaphore type A",
       "carre.construction": "SFR — Stop / warning signal",
       "carre.title": "Stop / warning signal",
-      "placement.repeat": "Repeat this signal"
+      "placement.repeat": "Repeat this signal",
+      "bal.workBlocks": "Number of following works blocks"
     }
   }
 }

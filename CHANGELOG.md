@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.4] - 2026-09-29
+
+- Ajoute « Nombre de cantons travaux suivants » (0 à 64) sous Vert CLI Travaux : le signal source et les N BAL suivants sont couverts, sous réserve des indications plus restrictives.
+- Recalcule la couverture sans modifier les réglages enregistrés des signaux suivants. Les zones peuvent se chevaucher ; diminuer le nombre ou décocher Travaux retire la couverture correspondante.
+- Les nouveaux signaux BAL et Carré utilisent la taille 4 et le placement à gauche du sens de circulation. Les signaux déjà posés restent inchangés.
+- Nécessite le SDK 0.8.0-alpha.7. Tests automatisés des règles et de l'intégration ; confirmation visuelle en jeu encore nécessaire.
+
+English:
+
+- Adds a following work-block count (0-64): the source and the next N BAL signals receive work-zone coverage, while more restrictive indications retain priority.
+- Recalculates overlapping work zones without changing saved downstream settings; reducing the count or disabling Works removes the corresponding coverage.
+- New BAL and Carre signals default to size 4 and the left side of travel. Existing signals remain unchanged.
+- Requires SDK 0.8.0-alpha.7. Automated rules and integration tests pass; visual confirmation in the game remains required.
+
 ## [0.2.0-alpha.3] - 2026-09-28
 
 - Améliore l'ouverture du Carré simple Avertissement à l'approche d'un train dans les deux cantons précédents, y compris en simulation accélérée.

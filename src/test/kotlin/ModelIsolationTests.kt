@@ -132,7 +132,7 @@ class ModelIsolationTests {
     }
 
     @Test fun nativeExportsKeepModelFallbackAndRecipeCodes() = memScoped {
-        assertEquals(6, nimby.internal.version()) // Declarative images require the matching adapter.
+        assertEquals(8, nimby.internal.version()) // Numeric settings and network preparation require the matching adapter.
         val raw = allocArray<IntVar>(2)
         val local = allocArray<IntVar>(2)
         for ((index, model) in listOf(BalSignals.model, CarreAvertissement.model).withIndex()) {

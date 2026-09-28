@@ -16,7 +16,7 @@ internal object CarreAvertissement {
         fallback = CarreDecision(CarreAspect.Closed, CarreReason.MissingObservation),
         invalidNetwork = CarreDecision(CarreAspect.Closed, CarreReason.InvalidTopology)
     ) {
-        construction(CarreTextures.catalogue, name = tr("carre.construction"))
+        construction(CarreTextures.catalogue, name = tr("carre.construction"), size = 4, left = true)
         observeApproach(blocks = 2)
         offerSignalPlacement()
         rules { CarreRules.decide(this) }
