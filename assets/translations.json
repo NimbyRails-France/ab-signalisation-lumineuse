@@ -1,0 +1,35 @@
+{
+  "fallback": "fr",
+  "languages": {
+    "fr": {
+      "bal.greenBlock": "Vert CLI Cantonnement",
+      "bal.greenBlock.help": "Active la préannonce selon l’indication du signal suivant.",
+      "bal.greenWork": "Vert CLI Travaux",
+      "bal.greenWork.help": "Active le vert clignotant de travaux lorsque les indications plus restrictives ne s’imposent pas.",
+      "bal.yellow": "Jaune CLI",
+      "bal.yellow.help": "Active l’annonce à distance réduite selon le signal suivant.",
+      "bal.red": "Rouge CLI",
+      "bal.red.help": "Autorise le rouge clignotant pour un canton occupé et un itinéraire connu. Ne force pas une permission native de mouvement.",
+      "carre.approach": "Ouverture automatique à l’approche",
+      "carre.approach.help": "Ouvrir à l’avertissement pour un train dans les deux cantons en amont, puis refermer après son passage. Un aval inconnu est supposé libre ; une occupation détectée interdit l’ouverture.",
+      "bal.title": "BAL — Sémaphore A",
+      "carre.title": "Carré simple Avertissement",
+      "placement.repeat": "Répéter ce signal"
+    },
+    "en": {
+      "bal.greenBlock": "Flashing green — block signalling",
+      "bal.greenBlock.help": "Enable advance warning based on the next signal aspect.",
+      "bal.greenWork": "Flashing green — works",
+      "bal.greenWork.help": "Enable flashing green for works when a more restrictive aspect is not required.",
+      "bal.yellow": "Flashing yellow",
+      "bal.yellow.help": "Enable short-distance warning based on the next signal.",
+      "bal.red": "Flashing red",
+      "bal.red.help": "Allow flashing red for an occupied block with a known route. Does not override native movement permission.",
+      "carre.approach": "Automatic opening on approach",
+      "carre.approach.help": "Display a warning for a train in either of the two upstream blocks, then close after it passes. Unknown downstream occupancy is assumed clear; detected occupancy prevents opening.",
+      "bal.title": "BAL — Semaphore A",
+      "carre.title": "Stop / warning signal",
+      "placement.repeat": "Repeat this signal"
+    }
+  }
+}

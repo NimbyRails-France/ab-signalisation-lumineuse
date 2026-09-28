@@ -1,78 +1,134 @@
-# Signalisation francaise realiste
+# Signalisation française réaliste
 
-Mod **Kotlin/Native** pour NIMBY Rails, charge par NRF Loader. Version 0.2.0.
-Le SDK gere toute l'integration native : aucun fichier C++ n'est requis dans le mod.
+Mod Kotlin/Native pour NIMBY Rails sous Windows. Le SDK gère l'intégration
+native ; le mod garde ses règles, vitesses, réglages et textures.
+Le [wiki officiel du SDK](https://wiki.nimbyrails-france.fr) enseigne la création
+de votre propre projet avec des exemples indépendants. SFR est un produit,
+pas un projet exemple à télécharger pour apprendre le SDK.
 
-Le code est organise par domaine dans `src/main/kotlin/sfr` :
+## Mod, modèles et signaux posés
 
-- `settings` : equipement des signaux et cases dans le jeu ;
-- `signalling` : indications, observations et regles BAL ;
-- `rendering` : textures et clignotements ;
-- `driving` : consignes, courbes de freinage et memoires ;
-- `FrenchSignalsMod.kt` : declaration du mod et liaison avec l'API Kotlin du SDK.
+Le **mod** est le paquet `signalisationfrancaiserealiste`. Il contient les
+**modèles** `sfr.bal-a` et `sfr.carre-simple-avertissement`. Un **signal posé**
+est une instance de l'un de ces modèles, avec son ID et ses propres réglages.
+SFR fonctionne sans Signal Placement : le bouton de répétition apparaît
+seulement si son fournisseur est chargé et observe la même partie.
+L'intégration du nouveau panneau reste à qualifier en jeu.
 
-Pour compiler et lancer les tests :
+## Organisation et responsabilités
 
 ```text
-.\gradlew.bat build
+src/main/kotlin/
+  Entry.kt                       Point d'entrée attendu par le SDK
+  sfr/
+    FrenchSignalsMod.kt          Identité du paquet et liste des modèles
+    integrations/
+      SignalPlacement.kt         Action facultative commune aux modèles
+    signals/
+      bal/
+        BalSignals.kt            Déclaration et assemblage des callbacks BAL
+        BalAspect.kt             Indications BAL uniquement
+        BalReason.kt             Motifs BAL uniquement
+        BalDecision.kt           Association typée des deux enums
+        BalRules.kt              Choix des indications
+        BalPanel.kt              Les quatre cases visibles
+        BalSettings.kt           Lecture des réglages
+        BalTextures.kt           SVG et phases de clignotement
+        BalDriving.kt            Consignes transmises au SDK
+        BalSpeeds.kt             Vitesses du BAL en m/s
+        BalDiagnostics.kt        Classement des défauts
+      carreavertissement/
+        CarreAvertissement.kt     Déclaration et assemblage des callbacks Carré
+        CarreAspect.kt           Indications Carré uniquement
+        CarreReason.kt           Motifs Carré uniquement
+        CarreDecision.kt         Association typée des deux enums
+        CarreRules.kt            Conditions de fermeture et d'ouverture
+        CarrePanel.kt            Sa case et son libellé
+        CarreSettings.kt         Lecture de ses réglages
+        CarreTextures.kt         Ses SVG
+        CarreDriving.kt          Ses consignes
+        CarreSpeeds.kt           Sa vitesse de passage après réouverture
+        CarreDiagnostics.kt      Ses défauts à journaliser
+src/test/kotlin/                  Tests des règles actuelles et de leur intégration SDK
 ```
 
-Ouvrir `build.gradle.kts` comme projet dans IntelliJ IDEA. Le chemin du SDK
-Kotlin se configure avec `NRF_KOTLIN_SDK` ou `nrfSdkDir` dans le fichier
-`gradle.properties` utilisateur. Sélectionner un JDK 21 pour Gradle.
+Chaque modèle possède ses enums : les fonctions du BAL ne peuvent pas recevoir
+un `CarreAspect`, et inversement. Les noms et ordinaux peuvent se répéter d'un
+modèle à l'autre sans collision.
 
-La sortie Release est dans `build/gradle/mod/release`, et le ZIP dans
-`build/gradle/distributions`. Aucun CMake ou compilateur C++ a installer cote mod.
+Le SDK fournit le même contexte à tous les modèles : observations, réglages,
+statut de disponibilité et voisin aval résolu. Un profil absent utilise les
+valeurs déclarées ; un profil indisponible rend l’observation non fraîche.
+Il n’y a aucun adaptateur d’observation ni fichier Neighbours à écrire par modèle.
 
-[Guide IntelliJ et Gradle](docs/gradle-intellij.md) : ouverture, dependance SDK,
-compilation et tests. [Organisation du Kotlin](docs/kotlin-development.md).
+`next` fournit l’ID, le type, la décision et la consigne de conduite du voisin.
+`next.of(monModele)` donne aussi accès à ses enums typées si nécessaire.
+Le BAL interprète les consignes connues dans `BalRules`, sans importer le Carré.
+Le SDK ne déduit ni un feu ni une vitesse de cette lecture. Une consigne non
+prise en charge reste inconnue. Le voisin est celui du lien aval dans le réseau
+résolu du mod, pas une recherche géométrique de tous les signaux alentour.
 
-Les identifiants de catalogue et de reglages sont conserves pour les parties
-existantes. Voir la [documentation du plugin](docs/README.md) pour son architecture
-et ses reglages.
+Le Carré ouvert à l'avertissement transmet la même obligation de conduite que
+l'avertissement BAL : annoncer un arrêt au signal suivant, suivre sa consigne
+visible et conserver une approche déjà reçue jusqu'au passage. Les 30 km/h dans
+`CarreSpeeds` concernent le passage après une réouverture autorisée ; ils ne
+limitent pas toute l'approche à une vitesse fixe. Fermé, ce Carré impose l'arrêt
+absolu. La fin de BAL est un usage possible, pas la définition de ce modèle.
 
-## Versions, changelog et notifications
+Ce Carré recherche une tête de train dans les **deux cantons en amont**
+(`observeApproach = true`, `approachBlocks = 2`). Il s’ouvre à l’avertissement,
+puis se referme dès que cette tête l’a franchi ; une queue encore en amont ne
+prouve pas une nouvelle approche. Un autre train en approche peut le rouvrir.
+Pour ce modèle seulement, l’absence de signal aval ou une occupation aval
+inconnue est supposée libre. Une occupation réellement détectée reste bloquante,
+comme une observation périmée, une panne ou un arrêt forcé. Cette règle appartient
+au mod ; le SDK conserve ses observations brutes et le BAL ne reprend pas cette
+tolérance.
 
-- La version de référence est dans `VERSION`. Elle doit correspondre à `CMakeLists.txt` ou à `package.json` et son lockfile, selon le projet.
-- Documenter les changements dans `CHANGELOG.md`, sous `[Unreleased]` pendant le développement, puis dans une section `## [X.Y.Z] - AAAA-MM-JJ` au moment de publier.
-- Pousser un commit `release X.Y.Z` sur la branche du canal choisi : Woodpecker sur le VPS construit, vérifie et publie les paquets Windows avec les notes de cette section. Aucun téléversement de binaire local. Voir [la procédure alpha](docs/windows-alpha-release.md).
-- Les builds Woodpecker sont annoncés dans le salon Discord `1550478726557470791`. Seules les releases GitHub publiées, versionnées et avec des notes sont annoncées dans `1549088597594873907`. Un push ou un tag seul ne publie aucune annonce de mise à jour.
-- La CI refuse les incohérences de versions et les tags sans changelog daté. Les releases en brouillon ne sont pas annoncées. Une correction des notes modifie l'annonce existante.
+Le parcours est : contexte SDK → règle du modèle → décision → image et consigne.
+Le SDK exécute la conduite en jeu. SFR ne contient plus de simulateur de freinage
+parallèle, de migration ou de forçage destiné au banc. Les appels de calcul
+`plan` renvoient désormais « indisponible » ; les consignes de `…Driving.kt`
+restent actives.
 
-Woodpecker construit le kit SDK épinglé, compile le mod Kotlin/Native pour Windows x64 et exécute ses tests et la vérification du chargeur sous Wine. Cela ne remplace pas les essais dans le jeu ni la validation native Windows.
+| Modification | Fichier du modèle |
+| --- | --- |
+| Ajouter un état ou un motif | `…Aspect.kt`, `…Reason.kt` |
+| Changer les conditions d'un feu | `…Rules.kt` |
+| Interpréter la consigne du voisin | `…Rules.kt`, via le contexte SDK |
+| Ajouter une case | `…Panel.kt`, puis `…Settings.kt` |
+| Changer l'image ou le clignotement | `…Textures.kt` |
+| Changer une consigne ou une vitesse | `…Driving.kt`, `…Speeds.kt` |
+| Classer une anomalie | `…Diagnostics.kt` |
 
-## Canaux de publication
+Pour ajouter un modèle : créer son dossier et ses enums, déclarer son
+`signalModel` avec ses replis et callbacks, puis ajouter `signal(Nouveau.model)`
+dans `FrenchSignalsMod`. Tester ses règles et ses interactions avec les voisins.
+Ses cases et ses images restent locales au modèle. Les ressources sont séparées
+dans `imgs/ca/sem_bal` et `imgs/cc/cs_a` ; le jeu conserve un seul catalogue
+`assets/mod.txt` par paquet.
 
-**Stable** : `vX.Y.Z` (release normale). **Bêta** : `vX.Y.Z-beta.N`. **Alpha** : `vX.Y.Z-alpha.N` (ces deux dernières sont des prereleases GitHub). `N` commence à 1. Le Hub mémorise un canal par projet, stable par défaut, sans basculer vers un autre canal si aucune release n’existe. Un retour vers une version plus ancienne nécessite une installation manuelle.
+## Nouvelle base et développement
 
-`VERSION` et le manifeste portent la version complète ; la version CMake garde seulement `X.Y.Z`. Publier le ZIP et son `project.json` dans la **même release**, avec son changelog. Pour le Hub lui-même, publier l’installateur et `hub-latest.json`. Le manifeste donne la taille, le SHA-256, le dossier racine et les règles de compatibilité. Aucun catalogue central ne doit être modifié.
-
-La politique est dans `release-channels.json`. Le contrôle `.woodpecker/check-release.py` refuse les autres canaux. Une release de test n’est jamais marquée comme dernière version stable.
-
-## Publier une mise à jour
-
-- **main** : canal stable.
-- **alpha** : canal alpha.
-- **beta** : canal beta.
-
-Un commit ordinaire lance les vérifications sans publier. Pour publier, préparez la même version dans `VERSION` et les fichiers de version du projet, puis ajoutez une entrée datée dans `CHANGELOG.md`. Décrivez les nouveautés, améliorations et corrections du point de vue des utilisateurs.
-
-Le titre exact du commit de publication est `release X.Y.Z` (exemple : alpha : `release 0.4.0-alpha.1` ; beta : `release 0.4.0-beta.1`). Poussez ce commit sur la branche du canal choisi. La compilation, les tests et la préparation des téléchargements doivent réussir avant la publication GitHub et son annonce Discord. Une version déjà publiée ne peut pas être remplacée : choisissez un nouveau numéro.
-
-Ne créez pas le tag à la main. Les préversions restent dans leur canal et ne remplacent pas la version stable.
+Cette version vise une nouvelle partie et est incompatible avec les anciens
+profils SFR. Aucune migration ni lecture des anciennes clés de réglage n’est
+conservée. Seules les quatre cases BAL actuelles sont reconnues.
 
 
-## Logs de production
+L’application de banc a été retirée. Aucun état forcé n’est autorisé par SFR.
+Les règles se testent automatiquement avec des observations simulées, puis
+se valident en conditions réelles dans une nouvelle partie.
 
-Le Hub propose **Téléchargements → Exporter les logs NRF** : un ZIP local
-regroupe les journaux du Hub, du SDK/chargeur, des mods, du TCO et du banc,
-ainsi qu'un résumé des versions. Aucun envoi automatique, aucune sauvegarde de
-jeu ni fichier de réglages n'est inclus. Les logs peuvent contenir des chemins
-personnels et des identifiants d'objets.
+Ouvrir `settings.gradle.kts` dans IntelliJ avec un JDK 21. Configurer `nrfSdkDir`
+vers un kit Kotlin construit depuis cette branche du SDK, puis recharger Gradle.
 
-Les composants Windows écrivent sous `%LOCALAPPDATA%/NimbyRailsFrance/logs`,
-chacun dans son dossier ; le Hub utilise `%LOCALAPPDATA%/NimbyRailsFrance/logs/hub`.
-Rotation et regroupement des erreurs répétées limitent le volume. Le TCO et le
-banc disposent aussi d'un bouton pour ouvrir leurs journaux.
-Voir [le contrat de diagnostic](../sdk/docs/production-diagnostics.md) pour les
-emplacements, la rétention, les tests et les limites en cas de crash natif.
+```powershell
+.\gradlew.bat windowsTest verifyNativeMod
+.\gradlew.bat assembleReleaseMod
+```
+
+Les fichiers produits sont dans `build/gradle/mod/release`. Ces commandes ne
+lancent pas le jeu, n'installent pas le mod et ne publient rien.
+Les anciens prototypes restent dans l'historique Git. Le VPS est réservé à la
+production ; les tests automatisés sont locaux et les essais en jeu restent
+une validation distincte.

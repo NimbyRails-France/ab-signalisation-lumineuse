@@ -7,6 +7,9 @@
         gradlePluginPortal()
         mavenCentral()
     }
+    // Keep the build plugin aligned with the API and native bridge in this kit.
+    val metadata = groovy.json.JsonSlurper().parseText(file(sdk).resolve("sdk.json").readText().removePrefix("\uFEFF")) as Map<*, *>
+    plugins { id("fr.nimbyrails.mod") version (metadata["gradlePluginVersion"] as String) }
 }
 
 dependencyResolutionManagement { repositories { mavenCentral() } }

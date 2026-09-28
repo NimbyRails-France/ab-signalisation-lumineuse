@@ -2,7 +2,7 @@
 schema=1
 name=Signalisation française réaliste - Kotlin
 author=Sami
-desc=Signalisation BAL type A en Kotlin. Integration native geree par le SDK.
+desc=Signalisation française : BAL et Carré simple Avertissement. Un mod, plusieurs modèles de signaux.
 version=0.2.0
 
 [SignalTextures]
@@ -27,3 +27,17 @@ name_en=SFR - BAL type A (Kotlin)
 name_loc=sfr_bal_a_cpp_v1_template
 kind=path
 textures=sfr_bal_a_cpp_v1
+
+[SignalTextures]
+id=sfr_cs_a_v1
+name_en=SFR - Carre simple Avertissement
+name_loc=sfr_cs_a_v1
+state=imgs/cc/cs_a/tex00.svg
+state=imgs/cc/cs_a/tex01.svg
+state=imgs/cc/cs_a/tex03.svg
+state=imgs/cc/cs_a/xx.svg
+
+[SignalTemplate]
+name_en=SFR - Carre simple Avertissement
+kind=path
+textures=sfr_cs_a_v1
