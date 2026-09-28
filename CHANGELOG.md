@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.3] - 2026-09-28
+
+- Améliore l'ouverture du Carré simple Avertissement à l'approche d'un train dans les deux cantons précédents, y compris en simulation accélérée.
+- Conserve la fermeture au passage de la tête du train et prépare l'ouverture pour le train suivant.
+- Améliore le fonctionnement de la marche à vue après un arrêt au BAL avec le nouveau SDK.
+- Traduit les noms et descriptions du mod et de ses signaux en français et en anglais.
+- Nécessite le SDK 0.8.0-alpha.3. Signal Placement reste facultatif.
+
+Improves approach detection and restricted movement with SDK 0.8.0-alpha.3. Mod and signal names are available in French and English; Signal Placement remains optional.
+
 ## [0.2.0-alpha.2] - 2026-09-28
 
 - Carré simple Avertissement : ouverture pour une tête de train dans les deux cantons en amont, fermeture après passage et nouvelle ouverture pour le train suivant.

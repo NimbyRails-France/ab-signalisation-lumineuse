@@ -17,11 +17,15 @@ internal object CarreRules {
         if (observation.lampFailed) return closed(CarreReason.LampFailure)
         if (!observation.fresh) return closed(CarreReason.ObservationUnavailable)
         if (observation.forcedStop) return closed(CarreReason.ForcedStop)
+        // Dès l'entrée de la tête dans la portion aval observée, refermer.
+        // La queue peut encore être en amont et un autre train déjà annoncé :
+        // cette occupation prime aussi quand aucune limite aval n'est connue.
         if (observation.block == Occupancy.Occupied) return closed(CarreReason.BlockOccupied)
         // À la sortie du BAL, l'absence de frontière aval ne bloque pas
         // l'ouverture. Une occupation réellement détectée reste prioritaire.
-        val approaching = observation.approachingTrain ?: return closed(CarreReason.AwaitingApproach)
-        if (approaching ushr 48 != 5L) return closed(CarreReason.MissingObservation)
+        // Le SDK valide l'identifiant et la fraîcheur de l'approche. Le mod
+        // choisit seulement si cette présence permet d'ouvrir le signal.
+        if (!context.trainApproaching) return closed(CarreReason.AwaitingApproach)
         return CarreDecision(CarreAspect.Warning, CarreReason.ApproachConfirmed)
     }
 }

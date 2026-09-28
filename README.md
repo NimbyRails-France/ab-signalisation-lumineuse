@@ -17,6 +17,12 @@ L'intégration du nouveau panneau reste à qualifier en jeu.
 
 ## Organisation et responsabilités
 
+L'identité vient de `mod.json` via `nimby.mod.modInfo`. `FrenchSignalsMod`
+déclare l'auteur et la description ; chaque modèle déclare `construction` avec
+le catalogue ordonné de son fichier `Textures`. Le plugin génère `mod.txt` au
+build. Ne pas réordonner les images d'un catalogue déjà utilisé dans une partie.
+Les descriptions des cases s'affichent sous leur libellé dans le panneau du jeu.
+
 ```text
 src/main/kotlin/
   Entry.kt                       Point d'entrée attendu par le SDK
@@ -132,3 +138,8 @@ lancent pas le jeu, n'installent pas le mod et ne publient rien.
 Les anciens prototypes restent dans l'historique Git. Le VPS est réservé à la
 production ; les tests automatisés sont locaux et les essais en jeu restent
 une validation distincte.
+
+Publication GitHub pendant une indisponibilité du VPS : commit de release avec
+le trailer `Release-Runner: github`. Les binaires Windows sont construits et
+testés par GitHub Actions, puis le catalogue public du Hub est actualisé.
+Le SDK épinglé doit être publié avant de lancer cette release.

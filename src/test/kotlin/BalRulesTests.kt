@@ -43,14 +43,12 @@ internal fun testBalRules() {
     expect(evaluateBalFixture(s,base.copy(fresh = false)).reason == Reason.ObservationUnavailable)
     rejected { FrenchSignalsMod().evaluate(s.asMap(), Observation(next = 99)) }
     for (a in Aspect.entries) {
-        expect(BalTextures.path(a,0).isNotEmpty())
-        expect(BalTextures.path(a,-1).endsWith("xx.svg"))
-        expect(BalTextures.path(a,0,99).endsWith("xx.svg"))
-        expect(BalTextures.path(a,0,10001).endsWith("xx.svg"))
+        expect(BalTextures.forAspect(a).frameAt(0).isNotEmpty())
+        rejected { BalTextures.forAspect(a).frameAt(-1) }
     }
-    expect(BalTextures.path(Aspect.GreenFlash,0).endsWith("tex05.svg"))
-    expect(BalTextures.path(Aspect.GreenFlash,500).endsWith("tex06.svg"))
-    expect(BalTextures.path(Aspect.YellowFlash,500).endsWith("tex08.svg"))
-    expect(BalTextures.path(Aspect.RedFlash,0).endsWith("tex09.svg"))
-    expect(BalTextures.path(Aspect.RedFlash,500).endsWith("tex10.svg"))
+    expect(BalTextures.forAspect(Aspect.GreenFlash).frameAt(0).endsWith("tex05.svg"))
+    expect(BalTextures.forAspect(Aspect.GreenFlash).frameAt(500).endsWith("tex06.svg"))
+    expect(BalTextures.forAspect(Aspect.YellowFlash).frameAt(500).endsWith("tex08.svg"))
+    expect(BalTextures.forAspect(Aspect.RedFlash).frameAt(0).endsWith("tex09.svg"))
+    expect(BalTextures.forAspect(Aspect.RedFlash).frameAt(500).endsWith("tex10.svg"))
 }

@@ -24,7 +24,9 @@ class SignalTypesTests {
         assertEquals("signalisationfrancaiserealiste",mod.id)
         assertTrue(mod.signalTypes.none { it.id==mod.id })
         assertEquals(setOf(BalSignals.TYPE,CarreAvertissement.TYPE),mod.signalTypes.map { it.id }.toSet())
-        assertEquals(listOf("sfr_bal_a_cpp_v1", "sfr_cs_a_v1"), mod.signalTypes.map { it.textureSet })
+        // This branch deliberately starts a new-map catalogue, without the old
+        // C++ identifier. It must not accidentally restore a retired model.
+        assertEquals(listOf("sfr_bal_a_v1", "sfr_cs_a_v1"), mod.signalTypes.map { it.textureSet })
         assertEquals(listOf("greenFlashBlock", "greenFlashWork", "yellowFlashEnabled", "redFlashEnabled"),
             mod.signalTypes[0].checkboxes.map { it.name })
         assertTrue(mod.signalTypes[0].checkboxes.all { !it.defaultValue && !it.onlyWhenEnabled })
@@ -85,6 +87,21 @@ class SignalTypesTests {
         assertNull(mod.forcedDecision(CarreAvertissement.TYPE, CarreAspect.Closed.ordinal))
     }
 
+    @Test fun headEntryClosesCarreEvenWithAnotherTrainApproachingAndNoExitSignal() {
+        val approachingCarre = carre(Observation(Occupancy.Unknown, true, false,
+            approachingTrain = approaching)).copy(nextSignal = 0)
+        assertEquals(CarreAspect.Warning, indication(approachingCarre))
+        // The leading head is downstream, its tail is still upstream. A second
+        // approach must not reopen the signal while the known prefix is occupied.
+        val entered = approachingCarre.copy(observation = approachingCarre.observation.copy(
+            block = Occupancy.Occupied, approachingTrain = approaching + 1))
+        val decision = assertNotNull(mod.decide(entered, null))
+        assertEquals(CarreAspect.Closed, mod.indication(decision)!!.aspect)
+        assertEquals(AutomaticDriving.stop(), mod.drivingRule(decision))
+        assertEquals(CarreAspect.Closed, indication(entered.copy(observation =
+            entered.observation.copy(approachingTrain = null))))
+    }
+
     @Test fun currentSettingsRoundTripWithoutAnyMigration() {
         for (mask in 0 until 16) {
             val values = mod.signalTypes.first().checkboxes.mapIndexed { i, box ->
@@ -114,6 +131,17 @@ class SignalTypesTests {
         assertFalse(DrivingFlag.Clear in rule.flags) // Cannot release a received approach early.
         val closed = mod.decide(carre(), null)!!
         assertEquals(AutomaticDriving.stop(), mod.drivingRule(closed))
+    }
+
+    @Test fun balDeclaresItsFlashingFramesToTheSdk() {
+        val decision = mod.evaluate(BalSignals.TYPE, mapOf("greenFlashWork" to true),
+            Observation(Occupancy.Clear, true, true, next = Aspect.VL.ordinal))
+        val animation = assertNotNull(mod.animation(decision))
+        assertEquals(500L, animation.everyMs)
+        assertEquals("imgs/ca/sem_bal/tex05.svg", animation.first)
+        assertEquals("imgs/ca/sem_bal/tex06.svg", animation.alternate)
+        assertEquals(animation.alternate, mod.texture(decision, 500, 250))
+        assertNull(mod.animation(mod.decide(carre(), null)!!)) // A fixed square needs no animation.
     }
 
 }

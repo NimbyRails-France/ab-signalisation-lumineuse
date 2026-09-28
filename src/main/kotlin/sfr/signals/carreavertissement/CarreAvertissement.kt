@@ -9,16 +9,18 @@ internal object CarreAvertissement {
     const val TYPE = "sfr.carre-simple-avertissement"
     const val TEXTURES = "sfr_cs_a_v1"
     val declaration = SignalType(TYPE, tr("carre.title"), TEXTURES,
-        CarrePanel.checkboxes, observeApproach = true, approachBlocks = 2)
+        CarrePanel.checkboxes)
 
     val model = signalModel(
         declaration,
         fallback = CarreDecision(CarreAspect.Closed, CarreReason.MissingObservation),
         invalidNetwork = CarreDecision(CarreAspect.Closed, CarreReason.InvalidTopology)
     ) {
+        construction(CarreTextures.catalogue, name = tr("carre.construction"))
+        observeApproach(blocks = 2)
         offerSignalPlacement()
         rules { CarreRules.decide(this) }
-        animatedImages { indication, time, half -> CarreTextures.path(indication.aspect, time, half) }
+        images { CarreTextures.path(it.aspect) }
         driving(CarreDriving::fromDecision)
         faults(CarreDiagnostics::isFault)
         aspectNames { it.label }

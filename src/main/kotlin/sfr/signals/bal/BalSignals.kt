@@ -7,19 +7,21 @@ import sfr.integrations.offerSignalPlacement
  * indépendantes des autres modèles. Le SDK fournit les données du voisin. */
 internal object BalSignals {
     const val TYPE = "sfr.bal-a"
-    const val TEXTURES = "sfr_bal_a_cpp_v1"
+    const val TEXTURES = "sfr_bal_a_v1"
 
     val model = signalModel(
         SignalType(TYPE, tr("bal.title"), TEXTURES, BalPanel.checkboxes),
         fallback = BalDecision(BalAspect.Unknown, BalReason.MissingObservation),
         invalidNetwork = BalDecision(BalAspect.Unknown, BalReason.InvalidTopology)
     ) {
+        construction(BalTextures.catalogue, name = tr("bal.construction"),
+            catalogueName = tr("bal.catalogue"))
         offerSignalPlacement()
         evaluate { settings, observation, next ->
             BalRules.evaluate(BalSettings.from(settings), observation, next)
         }
         rules { BalRules.decide(this) }
-        animatedImages { indication, time, half -> BalTextures.path(indication.aspect, time, half) }
+        appearance { BalTextures.forAspect(it.aspect) }
         driving(BalDriving::fromDecision)
         faults(BalDiagnostics::isFault)
         aspectNames { it.label }

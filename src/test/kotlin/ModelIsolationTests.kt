@@ -132,7 +132,7 @@ class ModelIsolationTests {
     }
 
     @Test fun nativeExportsKeepModelFallbackAndRecipeCodes() = memScoped {
-        assertEquals(5, nimby.internal.version()) // Multi-block approach requires the matching adapter.
+        assertEquals(6, nimby.internal.version()) // Declarative images require the matching adapter.
         val raw = allocArray<IntVar>(2)
         val local = allocArray<IntVar>(2)
         for ((index, model) in listOf(BalSignals.model, CarreAvertissement.model).withIndex()) {
@@ -147,5 +147,17 @@ class ModelIsolationTests {
         assertTrue(nimby.internal.fallbackType(2, 1, raw) < 0)
         assertTrue(nimby.internal.fallbackType(0, 2, raw) < 0)
         assertTrue(nimby.internal.localDecision(0, 0, local) < 0)
+        val first = allocArray<ByteVar>(96)
+        val alternate = allocArray<ByteVar>(96)
+        val period = alloc<LongVar>()
+        val flash = mod.evaluate(BalSignals.TYPE, mapOf("greenFlashWork" to true),
+            Observation(Occupancy.Clear, true, true, next = BalAspect.VL.ordinal))
+        assertEquals(0, nimby.internal.textureAnimation(flash.aspect, flash.reason, first, alternate, 96, period.ptr))
+        assertEquals("imgs/ca/sem_bal/tex05.svg", first.toKString())
+        assertEquals("imgs/ca/sem_bal/tex06.svg", alternate.toKString())
+        assertEquals(500L, period.value)
+        assertTrue(nimby.internal.textureAnimation(flash.aspect, flash.reason, first, alternate, 1, period.ptr) < 0)
+        val fixed = mod.unknownDecision(CarreAvertissement.TYPE)
+        assertEquals(1, nimby.internal.textureAnimation(fixed.aspect, fixed.reason, first, alternate, 96, period.ptr))
     }
 }

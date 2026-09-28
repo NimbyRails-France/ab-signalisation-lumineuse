@@ -1,17 +1,30 @@
 package sfr.signals.bal
 
-/** Rendu du BAL et phase de clignotement à partir du temps simulé. */
+import nimby.*
+
+/** Le mod choisit les SVG et la cadence. Le SDK calcule et affiche la phase
+ * sur l'horloge du jeu, y compris quand la simulation est en pause ou accélérée.
+ * Les descriptions sont créées une seule fois, pas à chaque observation. */
 internal object BalTextures {
-    fun path(aspect: BalAspect, simulationMs: Long, halfPeriodMs: Long = 500): String {
-        val folder="imgs/ca/sem_bal/"
-        if(simulationMs<0 || halfPeriodMs !in 100..10000) return folder+"xx.svg"
-        val lit=(simulationMs/halfPeriodMs)%2==0L
-        val file=when(aspect) {
-            BalAspect.Unknown->"xx";BalAspect.VL->"tex02";BalAspect.A->"tex03";BalAspect.S->"tex04"
-            BalAspect.GreenFlash->if(lit)"tex05" else "tex06"
-            BalAspect.YellowFlash->if(lit)"tex07" else "tex08"
-            BalAspect.RedFlash->if(lit)"tex09" else "tex10"
-        }
-        return "$folder$file.svg"
+    private const val folder = "imgs/ca/sem_bal/"
+    // Ordre du catalogue historique : les parties enregistrent ces indices.
+    // Même les images non utilisées par une règle doivent garder leur place.
+    val catalogue = (0..10).map { folder + "tex${it.toString().padStart(2, '0')}.svg" } + (folder + "xx.svg")
+    private val unknown = steady(folder + "xx.svg")
+    private val clear = steady(folder + "tex02.svg")
+    private val warning = steady(folder + "tex03.svg")
+    private val stop = steady(folder + "tex04.svg")
+    private val greenFlash = blink(folder + "tex05.svg", folder + "tex06.svg", everyMs = 500)
+    private val yellowFlash = blink(folder + "tex07.svg", folder + "tex08.svg", everyMs = 500)
+    private val redFlash = blink(folder + "tex09.svg", folder + "tex10.svg", everyMs = 500)
+
+    fun forAspect(aspect: BalAspect): SignalAnimation = when (aspect) {
+        BalAspect.Unknown -> unknown
+        BalAspect.VL -> clear
+        BalAspect.A -> warning
+        BalAspect.S -> stop
+        BalAspect.GreenFlash -> greenFlash
+        BalAspect.YellowFlash -> yellowFlash
+        BalAspect.RedFlash -> redFlash
     }
 }

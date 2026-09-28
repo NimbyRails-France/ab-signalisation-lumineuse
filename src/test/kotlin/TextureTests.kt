@@ -15,11 +15,10 @@ internal fun testTextureAssets() {
         .filter { it.startsWith("state=") }.map { it.substringAfter('=') }.toList()
     expect(catalogue == expected)
     CarreAspect.entries.forEach { aspect ->
-        expect(CarreTextures.path(aspect, 0, 500) in catalogue)
-        expect(CarreTextures.path(aspect, 500, 500) in catalogue)
+        expect(CarreTextures.path(aspect) in catalogue)
     }
     Aspect.entries.forEach { aspect ->
-        expect(BalTextures.path(aspect, 0) in catalogue)
-        expect(BalTextures.path(aspect, 500) in catalogue)
+        expect(BalTextures.forAspect(aspect).frameAt(0) in catalogue)
+        expect(BalTextures.forAspect(aspect).frameAt(500) in catalogue)
     }
 }

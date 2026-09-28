@@ -2,6 +2,8 @@
   "fallback": "fr",
   "languages": {
     "fr": {
+      "mod.name": "Signalisation française réaliste",
+      "mod.description": "Signalisation française : BAL et Carré simple Avertissement. Un mod, plusieurs modèles de signaux.",
       "bal.greenBlock": "Vert CLI Cantonnement",
       "bal.greenBlock.help": "Active la préannonce selon l’indication du signal suivant.",
       "bal.greenWork": "Vert CLI Travaux",
@@ -13,10 +15,15 @@
       "carre.approach": "Ouverture automatique à l’approche",
       "carre.approach.help": "Ouvrir à l’avertissement pour un train dans les deux cantons en amont, puis refermer après son passage. Un aval inconnu est supposé libre ; une occupation détectée interdit l’ouverture.",
       "bal.title": "BAL — Sémaphore A",
+      "bal.construction": "SFR — BAL type A",
+      "bal.catalogue": "SFR — Sémaphore BAL type A",
+      "carre.construction": "SFR — Carré simple Avertissement",
       "carre.title": "Carré simple Avertissement",
       "placement.repeat": "Répéter ce signal"
     },
     "en": {
+      "mod.name": "Realistic French signalling",
+      "mod.description": "French signalling: BAL and Carré simple Avertissement. One mod with several signal models.",
       "bal.greenBlock": "Flashing green — block signalling",
       "bal.greenBlock.help": "Enable advance warning based on the next signal aspect.",
       "bal.greenWork": "Flashing green — works",
@@ -28,6 +35,9 @@
       "carre.approach": "Automatic opening on approach",
       "carre.approach.help": "Display a warning for a train in either of the two upstream blocks, then close after it passes. Unknown downstream occupancy is assumed clear; detected occupancy prevents opening.",
       "bal.title": "BAL — Semaphore A",
+      "bal.construction": "SFR — BAL type A",
+      "bal.catalogue": "SFR — BAL semaphore type A",
+      "carre.construction": "SFR — Stop / warning signal",
       "carre.title": "Stop / warning signal",
       "placement.repeat": "Repeat this signal"
     }
