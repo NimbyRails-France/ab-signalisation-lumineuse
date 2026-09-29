@@ -2,10 +2,10 @@
   "id": "signalisationfrancaiserealiste",
   "name": "Signalisation française réaliste",
   "modId": "SignalisationFrancaiseRealiste",
-  "version": "0.2.0-alpha.4",
+  "version": "0.2.0-alpha.5",
   "module": "SignalisationFrancaiseRealisteMod",
   "language": "kotlin-native",
-  "sdkMin": "0.8.0-alpha.7",
+  "sdkMin": "0.8.0-alpha.8",
   "sdkMaxExclusive": "0.9.0",
   "gameSha256": [
     "fff49ac21720abfc824c2b4f68b862727630eb0db71cfe1f9ea8f685d0db10ae"

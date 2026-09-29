@@ -2,6 +2,7 @@ package sfr.tests
 
 import sfr.signals.bal.*
 import sfr.signals.carreavertissement.*
+import sfr.signals.carrebal.CarreBal
 
 import kotlin.test.*
 import nimby.*
@@ -19,14 +20,14 @@ class SignalTypesTests {
         2, 3, mapOf("active" to true), observation, type = CarreAvertissement.TYPE)
     private fun indication(signal: Signal) = mod.indication(mod.decide(signal, null)!!)!!.aspect
 
-    @Test fun oneModDeclaresTwoIndependentTypes() {
+    @Test fun oneModDeclaresThreeIndependentTypes() {
         validateSignalTypes(mod.signalTypes)
         assertEquals("signalisationfrancaiserealiste",mod.id)
         assertTrue(mod.signalTypes.none { it.id==mod.id })
-        assertEquals(setOf(BalSignals.TYPE,CarreAvertissement.TYPE),mod.signalTypes.map { it.id }.toSet())
+        assertEquals(setOf(BalSignals.TYPE,CarreAvertissement.TYPE,CarreBal.TYPE),mod.signalTypes.map { it.id }.toSet())
         // This branch deliberately starts a new-map catalogue, without the old
         // C++ identifier. It must not accidentally restore a retired model.
-        assertEquals(listOf("sfr_bal_a_v1", "sfr_cs_a_v1"), mod.signalTypes.map { it.textureSet })
+        assertEquals(listOf("sfr_bal_a_v1", "sfr_cs_a_v1", "sfr_carre_bal_c_v1"), mod.signalTypes.map { it.textureSet })
         assertEquals(listOf("greenFlashBlock", "greenFlashWork", "yellowFlashEnabled", "redFlashEnabled"),
             mod.signalTypes[0].checkboxes.take(4).map { it.name })
         assertEquals(listOf(BalPanel.workBlocks), mod.signalTypes[0].numbers)

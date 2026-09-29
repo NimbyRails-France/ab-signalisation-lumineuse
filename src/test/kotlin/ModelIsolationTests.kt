@@ -7,6 +7,7 @@ import nimby.*
 import sfr.FrenchSignalsMod
 import sfr.signals.bal.*
 import sfr.signals.carreavertissement.*
+import sfr.signals.carrebal.CarreBal
 
 private enum class ForeignAspect { Open }
 private enum class ForeignReason { Normal }
@@ -135,7 +136,7 @@ class ModelIsolationTests {
         assertEquals(8, nimby.internal.version()) // Numeric settings and network preparation require the matching adapter.
         val raw = allocArray<IntVar>(2)
         val local = allocArray<IntVar>(2)
-        for ((index, model) in listOf(BalSignals.model, CarreAvertissement.model).withIndex()) {
+        for ((index, model) in listOf(BalSignals.model, CarreAvertissement.model, CarreBal.model).withIndex()) {
             assertEquals(0, nimby.internal.fallbackType(index, 1, raw))
             val expected = mod.invalidNetworkDecision(model.type.id)
             assertEquals(expected, Decision(raw[0], raw[1]))
@@ -144,7 +145,7 @@ class ModelIsolationTests {
             assertEquals(mod.indication(expected)!!.reason.ordinal, local[1])
             assertEquals(1, nimby.internal.forceType(index, 0, raw)) // SFR no longer accepts forced states.
         }
-        assertTrue(nimby.internal.fallbackType(2, 1, raw) < 0)
+        assertTrue(nimby.internal.fallbackType(3, 1, raw) < 0)
         assertTrue(nimby.internal.fallbackType(0, 2, raw) < 0)
         assertTrue(nimby.internal.localDecision(0, 0, local) < 0)
         val first = allocArray<ByteVar>(96)

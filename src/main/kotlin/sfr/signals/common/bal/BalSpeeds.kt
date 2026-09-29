@@ -1,4 +1,4 @@
-package sfr.signals.bal
+package sfr.signals.common.bal
 
 /** Plafonds en m/s du BAL francais. */
 internal object BalSpeeds {

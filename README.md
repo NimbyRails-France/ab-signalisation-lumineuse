@@ -9,7 +9,7 @@ pas un projet exemple à télécharger pour apprendre le SDK.
 ## Mod, modèles et signaux posés
 
 Le **mod** est le paquet `signalisationfrancaiserealiste`. Il contient les
-**modèles** `sfr.bal-a` et `sfr.carre-simple-avertissement`. Un **signal posé**
+**modèles** `sfr.bal-a`, `sfr.carre-simple-avertissement` et `sfr.carre-bal-c`. Un **signal posé**
 est une instance de l'un de ces modèles, avec son ID et ses propres réglages.
 SFR fonctionne sans Signal Placement : le bouton de répétition apparaît
 seulement si son fournisseur est chargé et observe la même partie.
@@ -19,13 +19,21 @@ L'intégration du nouveau panneau reste à qualifier en jeu.
 
 ### Zone de travaux et construction
 
-Dans un BAL, cocher **Vert CLI Travaux** fait apparaître **Nombre de cantons travaux suivants** (0 à 64).
-Avec 2, le BAL sélectionné et les deux BAL suivants sont couverts. Avec 0, seul le BAL sélectionné l'est.
-Un arrêt, une occupation ou une annonce plus restrictive restent prioritaires. La propagation suit les liens aval connus et s'arrête sur un autre modèle, une liaison manquante ou une observation indisponible.
+Dans un BAL ou Carré BAL, cocher **Vert CLI Travaux** fait apparaître **Nombre de cantons travaux suivants** (0 à 64).
+Avec 2, le BAL sélectionné et les deux BAL ou Carrés BAL suivants sont couverts. Avec 0, seul le BAL sélectionné l'est.
+Un arrêt, une occupation ou une annonce plus restrictive restent prioritaires. La propagation suit les liens aval connus et s'arrête hors des modèles BAL et Carré BAL, sur une liaison manquante ou sur une observation indisponible.
 Les réglages des BAL suivants ne sont pas réécrits : décocher la source ou réduire le nombre recalcule immédiatement sa couverture. Les zones qui se chevauchent se combinent.
 
-Les nouveaux BAL et Carré sont déclarés en taille **4**, à **gauche dans le sens de circulation**, avec le SDK 0.8.0-alpha.7.
+Les nouveaux BAL et Carré sont déclarés en taille **4**, à **gauche dans le sens de circulation**, avec le SDK 0.8.0-alpha.8.
 Les signaux existants conservent leurs propriétés ; Répéter conserve celles du signal copié.
+
+### Carré BAL type C
+
+Le Carré BAL reprend les quatre réglages du Sémaphore BAL et le compteur de cantons travaux suivants.
+**Forcer au carré** maintient un arrêt absolu jusqu’à décocher la case ; les travaux et le rouge clignotant ne peuvent pas le libérer.
+Sans forçage, le cantonnement et les consignes sont ceux du BAL, y compris le sémaphore pour un canton occupé.
+Le modèle utilise `imgs/cc/cc_sma`, avec son propre catalogue, ajouté après les modèles existants.
+Les noms des signaux sont toujours en français et comportent leur type ; aides et réglages restent traduits.
 
 ### Sources
 
@@ -43,18 +51,40 @@ src/main/kotlin/
     integrations/
       SignalPlacement.kt         Action facultative commune aux modèles
     signals/
+      BalNeighbours.kt          Interprétation des voisins entre modèles
+      common/
+        bal/
+          BalAspect.kt          Indications du calcul partagé
+          BalReason.kt          Motifs du calcul partagé
+          BalDecision.kt        Résultat typé du calcul partagé
+          BalRules.kt           Calcul du cantonnement commun
+          BalSettings.kt        Format des quatre réglages BAL
+          BalPanel.kt           Options et compteur travaux communs
+          BalDriving.kt         Consignes communes de conduite
+          BalSpeeds.kt          Vitesses BAL en m/s
+          BalWorkZone.kt        Propagation des zones de travaux
       bal/
         BalSignals.kt            Déclaration et assemblage des callbacks BAL
         BalAspect.kt             Indications BAL uniquement
         BalReason.kt             Motifs BAL uniquement
         BalDecision.kt           Association typée des deux enums
-        BalRules.kt              Choix des indications
+        BalRules.kt              Utilisation des règles communes par le Sémaphore
         BalPanel.kt              Les quatre cases visibles
         BalSettings.kt           Lecture des réglages
         BalTextures.kt           SVG et phases de clignotement
         BalDriving.kt            Consignes transmises au SDK
-        BalSpeeds.kt             Vitesses du BAL en m/s
         BalDiagnostics.kt        Classement des défauts
+      carrebal/
+        CarreBal.kt              Déclaration et assemblage du Carré BAL
+        CarreBalAspect.kt        Indications propres, dont le carré fermé
+        CarreBalReason.kt        Motifs propres au modèle
+        CarreBalDecision.kt      Association typée des deux enums
+        CarreBalRules.kt         Fermeture au carré puis règles BAL communes
+        CarreBalSettings.kt      Réglages BAL et forçage au carré
+        CarreBalPanel.kt         Options communes et case Forcer au carré
+        CarreBalTextures.kt      SVG CC SMA et clignotements
+        CarreBalDriving.kt       Arrêt absolu ou consignes BAL communes
+        CarreBalDiagnostics.kt   Classement des défauts
       carreavertissement/
         CarreAvertissement.kt     Déclaration et assemblage des callbacks Carré
         CarreAspect.kt           Indications Carré uniquement
@@ -81,7 +111,10 @@ Il n’y a aucun adaptateur d’observation ni fichier Neighbours à écrire par
 
 `next` fournit l’ID, le type, la décision et la consigne de conduite du voisin.
 `next.of(monModele)` donne aussi accès à ses enums typées si nécessaire.
-Le BAL interprète les consignes connues dans `BalRules`, sans importer le Carré.
+Le BAL et le Carré BAL partagent le calcul du cantonnement dans `common/bal/BalRules.kt`.
+Ce dossier commun ne dépend d'aucun modèle concret. `BalNeighbours` interprète les
+indications des deux modèles et les consignes de conduite des autres modèles.
+`FrenchSignalsMod` fournit à la propagation des travaux les modèles qui y participent.
 Le SDK ne déduit ni un feu ni une vitesse de cette lecture. Une consigne non
 prise en charge reste inconnue. Le voisin est celui du lien aval dans le réseau
 résolu du mod, pas une recherche géométrique de tous les signaux alentour.

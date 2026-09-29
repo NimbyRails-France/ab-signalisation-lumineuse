@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.5] - 2026-09-29
+
+- Nécessite le SDK 0.8.0-alpha.8 : le compteur travaux apparaît juste sous sa case d’activation.
+
+- Extrait le cantonnement, les réglages, les vitesses et les zones de travaux dans `signals/common/bal/`. Chaque modèle conserve ses fichiers d'indications, de règles, de panneau, de textures et de conduite.
+- Ajoute le Carré BAL type C avec les textures CC SMA, les mêmes réglages que le Sémaphore BAL et une case « Forcer au carré » pour maintenir un arrêt absolu.
+- Les zones de travaux traversent les BAL et Carrés BAL ; leur portée et les réglages sauvegardés restent indépendants du forçage au carré.
+- Les noms des signaux restent en français, avec leur type, dans toutes les langues. Les nouveaux signaux restent à gauche et en taille 4.
+- Tests des règles BAL, du carré forcé, des réseaux mixtes et des textures. Confirmation visuelle en jeu à effectuer.
+
+English:
+
+- Requires SDK 0.8.0-alpha.8 so the works counter appears directly below its enabling checkbox.
+- Moves shared BAL rules, settings, speeds and work-zone propagation into `signals/common/bal/`, keeping each model's declarations, indications, panel, textures and driving files separate.
+- Adds Carré BAL type C using CC SMA textures, the existing BAL settings and a force-closed option imposing an absolute stop.
+- Work zones extend across BAL and Carré BAL signals without overwriting saved settings or bypassing a forced stop.
+- Signal names retain their French names and type in every language. New signals default to the left side and size 4.
+- Tests cover BAL rules, forced stops, mixed networks and texture mappings. Visual confirmation in the game remains required.
+
 ## [0.2.0-alpha.4] - 2026-09-29
 
 - Ajoute « Nombre de cantons travaux suivants » (0 à 64) sous Vert CLI Travaux : le signal source et les N BAL suivants sont couverts, sous réserve des indications plus restrictives.
