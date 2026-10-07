@@ -143,7 +143,10 @@ class SignalTypesTests {
         assertEquals("imgs/ca/sem_bal/tex05.svg", animation.first)
         assertEquals("imgs/ca/sem_bal/tex06.svg", animation.alternate)
         assertEquals(animation.alternate, mod.texture(decision, 500, 250))
-        assertNull(mod.animation(mod.decide(carre(), null)!!)) // A fixed square needs no animation.
+        val fixed = assertNotNull(mod.animation(mod.decide(carre(), null)!!))
+        assertEquals(0L, fixed.everyMs)
+        assertEquals(fixed.first, fixed.alternate)
+        assertEquals(fixed.first, fixed.frameAt(Long.MAX_VALUE))
     }
 
 }

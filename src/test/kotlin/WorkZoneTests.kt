@@ -5,7 +5,9 @@ import kotlin.test.*
 import nimby.*
 import sfr.FrenchSignalsMod
 import sfr.signals.bal.*
+import sfr.signals.carreavertissement.CarreAvertissement
 import kotlinx.cinterop.*
+import kotlin.random.Random
 
 class WorkZoneTests {
     private val mod = FrenchSignalsMod()
@@ -60,6 +62,41 @@ class WorkZoneTests {
         assertFailsWith<IllegalArgumentException> { BalPanel.workBlocks.withValue(emptyMap(),-1) }
         assertTrue(mod.signalTypes.all { it.construction!!.size==4 })
         assertTrue(mod.signalTypes.all { it.construction!!.left })
+    }
+
+    @Test fun overlappingSourcesMatchIndependentBoundedWalksAcrossBrokenRoutes() {
+        val random = Random(8127)
+        repeat(120) {
+            val input = chain(96).map { signal -> signal.copy(
+                nextSignal = random.nextInt(0, 102).toLong(),
+                settings = BalPanel.workBlocks.withValue(mapOf("greenFlashWork" to (random.nextInt(4) == 0)), random.nextInt(65)),
+                settingsStatus = SettingsStatus.entries[random.nextInt(SettingsStatus.entries.size)],
+                observation = signal.observation.copy(fresh = random.nextInt(10) != 0, routeKnown = random.nextInt(10) != 0),
+                type = if (random.nextInt(10) == 0) CarreAvertissement.TYPE else BalSignals.TYPE)
+            }
+            val byId = input.associateBy { it.id }
+            val expected = input.filter { it.settings["greenFlashWork"] == true }.map { it.id }.toMutableSet()
+            for (source in input.filter { it.type == BalSignals.TYPE && it.settingsStatus == SettingsStatus.Present && it.settings["greenFlashWork"] == true }) {
+                var cursor = source
+                val visited = mutableSetOf(source.id)
+                for (step in 0 until BalPanel.workBlocks.read(source.settings)) {
+                    if (!cursor.observation.fresh || !cursor.observation.routeKnown || cursor.settingsStatus == SettingsStatus.Unavailable) break
+                    val next = byId[cursor.nextSignal] ?: break
+                    if (next.type != BalSignals.TYPE || next.settingsStatus == SettingsStatus.Unavailable || !visited.add(next.id)) break
+                    expected.add(next.id)
+                    cursor = next
+                }
+            }
+            assertEquals(expected, input.covered())
+            assertEquals(expected, input.reversed().covered())
+        }
+    }
+
+    @Test fun denseSavedSourcesAreNotCopied() {
+        val input = chain(4096).source(1, 64).map { it.copy(
+            settings = BalPanel.workBlocks.withValue(mapOf("greenFlashWork" to true), 64)) }
+        val prepared = mod.prepareObservedNetwork(input)
+        input.indices.forEach { assertSame(input[it], prepared[it]) }
     }
     @Test fun nativeNetworkPreparationPreservesInputsAndEncodesDerivedSettings() = memScoped {
         val input = chain(4).source(1,2).map { if(it.id==2L) it.copy(settingsStatus=SettingsStatus.Absent) else it }

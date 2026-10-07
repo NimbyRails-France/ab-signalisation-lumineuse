@@ -159,6 +159,9 @@ class ModelIsolationTests {
         assertEquals(500L, period.value)
         assertTrue(nimby.internal.textureAnimation(flash.aspect, flash.reason, first, alternate, 1, period.ptr) < 0)
         val fixed = mod.unknownDecision(CarreAvertissement.TYPE)
-        assertEquals(1, nimby.internal.textureAnimation(fixed.aspect, fixed.reason, first, alternate, 96, period.ptr))
+        assertEquals(0, nimby.internal.textureAnimation(fixed.aspect, fixed.reason, first, alternate, 96, period.ptr))
+        assertEquals("imgs/cc/cs_a/tex01.svg", first.toKString())
+        assertEquals(first.toKString(), alternate.toKString())
+        assertEquals(0L, period.value)
     }
 }

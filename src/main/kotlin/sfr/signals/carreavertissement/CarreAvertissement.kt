@@ -20,7 +20,7 @@ internal object CarreAvertissement {
         observeApproach(blocks = 2)
         offerSignalPlacement()
         rules { CarreRules.decide(this) }
-        images { CarreTextures.path(it.aspect) }
+        appearance { CarreTextures.forAspect(it.aspect) }
         driving(CarreDriving::fromDecision)
         faults(CarreDiagnostics::isFault)
         aspectNames { it.label }

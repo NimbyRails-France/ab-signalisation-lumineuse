@@ -32,8 +32,8 @@ internal fun testNetworkAndInstructions() {
     expect(mod.evaluateNetwork(listOf(signal(1,2),signal(2,1,Occupancy.Occupied))).map { it.indication } == listOf(Aspect.A,Aspect.S))
     rejected { mod.evaluateNetwork(listOf(signal(1),signal(1))) }
     rejected { mod.evaluateNetwork(listOf(signal(0))) }
-    rejected { mod.evaluateNetwork(List(513) { signal(it.toLong()+1) }) }
-    expect(mod.evaluateNetwork(List(512) { signal(it.toLong()+1,if(it==511)0 else it.toLong()+2) }).all { it.indication == Aspect.Unknown })
+    rejected { mod.evaluateNetwork(List(4097) { signal(it.toLong()+1) }) }
+    expect(mod.evaluateNetwork(List(4096) { signal(it.toLong()+1,if(it==4095)0 else it.toLong()+2) }).all { it.indication == Aspect.Unknown })
     expect(mod.decide(signal(1).copy(settingsStatus = SettingsStatus.Absent),null)?.indication == Aspect.Unknown)
     expect(mod.decide(signal(1).copy(settingsStatus = SettingsStatus.Unavailable),null)?.motif == Reason.ObservationUnavailable)
     val red = signal(1,block=Occupancy.Occupied).copy(settings=BalSettings(redFlashEnabled=true).asMap())

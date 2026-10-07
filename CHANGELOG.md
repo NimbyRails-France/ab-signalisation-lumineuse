@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.6] - 2026-10-08
+
+- Nouveau nom : **AB Signalisation lumineuse**, avec le préfixe **AB** dans les noms des signaux. Le mod reste en développement.
+- Améliore la fluidité des zones de travaux sur les grands réseaux, notamment lorsque plusieurs zones se chevauchent.
+- Optimise l'affichage du Carré simple Avertissement.
+
+Prérequis : **SDK 0.9.0-alpha.1** (alpha) ou plus récent, inférieur à **0.10.0**.
+
+English:
+
+- New name: **AB Signalisation lumineuse**, with the **AB** prefix in signal names. The mod remains in development.
+- Improves work-zone performance on large networks, especially when several zones overlap.
+- Optimizes the Carré simple Avertissement display.
+
+Requires **SDK 0.9.0-alpha.1** (alpha) or later, below **0.10.0**.
+
 ## [0.2.0-alpha.5] - 2026-09-29
 
 - Nécessite le SDK 0.8.0-alpha.8 : le compteur travaux apparaît juste sous sa case d’activation.

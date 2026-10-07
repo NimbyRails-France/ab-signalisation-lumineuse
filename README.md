@@ -1,9 +1,9 @@
-# Signalisation française réaliste
+# AB Signalisation lumineuse
 
 Mod Kotlin/Native pour NIMBY Rails sous Windows. Le SDK gère l'intégration
 native ; le mod garde ses règles, vitesses, réglages et textures.
 Le [wiki officiel du SDK](https://wiki.nimbyrails-france.fr) enseigne la création
-de votre propre projet avec des exemples indépendants. SFR est un produit,
+de votre propre projet avec des exemples indépendants. AB Signalisation lumineuse est un produit,
 pas un projet exemple à télécharger pour apprendre le SDK.
 
 ## Mod, modèles et signaux posés
@@ -11,7 +11,7 @@ pas un projet exemple à télécharger pour apprendre le SDK.
 Le **mod** est le paquet `signalisationfrancaiserealiste`. Il contient les
 **modèles** `sfr.bal-a`, `sfr.carre-simple-avertissement` et `sfr.carre-bal-c`. Un **signal posé**
 est une instance de l'un de ces modèles, avec son ID et ses propres réglages.
-SFR fonctionne sans Signal Placement : le bouton de répétition apparaît
+AB Signalisation lumineuse fonctionne sans BA Signal Placement : le bouton de répétition apparaît
 seulement si son fournisseur est chargé et observe la même partie.
 L'intégration du nouveau panneau reste à qualifier en jeu.
 
@@ -137,7 +137,7 @@ au mod ; le SDK conserve ses observations brutes et le BAL ne reprend pas cette
 tolérance.
 
 Le parcours est : contexte SDK → règle du modèle → décision → image et consigne.
-Le SDK exécute la conduite en jeu. SFR ne contient plus de simulateur de freinage
+Le SDK exécute la conduite en jeu. Le mod ne contient plus de simulateur de freinage
 parallèle, de migration ou de forçage destiné au banc. Les appels de calcul
 `plan` renvoient désormais « indisponible » ; les consignes de `…Driving.kt`
 restent actives.
@@ -166,7 +166,7 @@ profils SFR. Aucune migration ni lecture des anciennes clés de réglage n’est
 conservée. Seules les quatre cases BAL actuelles sont reconnues.
 
 
-L’application de banc a été retirée. Aucun état forcé n’est autorisé par SFR.
+L’application de banc a été retirée. Aucun état forcé n’est autorisé par ce mod.
 Les règles se testent automatiquement avec des observations simulées, puis
 se valident en conditions réelles dans une nouvelle partie.
 

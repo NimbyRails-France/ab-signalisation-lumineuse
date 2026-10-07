@@ -16,5 +16,6 @@ internal fun FrenchSignalsMod(): SignallingMod = signalMod(modInfo) {
     signal(BalSignals.model)
     signal(CarreAvertissement.model)
     signal(CarreBal.model)
-    prepareNetwork { BalWorkZone.apply(it, listOf(BalSignals.model.type, CarreBal.model.type)) }
+    val workZone = BalWorkZone(listOf(BalSignals.model.type, CarreBal.model.type))
+    prepareNetwork(workZone::apply)
 }
