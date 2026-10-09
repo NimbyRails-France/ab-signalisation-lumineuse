@@ -1,7 +1,6 @@
 package sfr.tests
 
-import sfr.signals.bal.*
-import sfr.signals.carreavertissement.CarreAvertissement
+import sfr.signals.t_c.c.b.v.`101000000`.Signal as T_C_101000000
 
 import kotlin.test.Test
 
@@ -12,7 +11,7 @@ class RegressionTests {
         for (type in mod.signalTypes) for (code in -1..100)
             kotlin.test.assertNull(mod.forcedDecision(type.id, code))
     }
-    @Test fun balRules() = testBalRules()
+    @Test fun balRules() = test011100000Rules()
     @Test fun networkAndDrivingInstructions() = testNetworkAndInstructions()
     @Test fun removedDiagnosticCalculatorReportsUnavailable() {
         kotlin.test.assertFalse(sfr.FrenchSignalsMod().plan(

@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [0.2.0-alpha.7] - 2026-10-09
+
+### Français
+
+- Adopte les noms de référence **AB T_A 011100000**, **AB T_C 101000000** et **AB T_C 111000000** dans le catalogue de construction et les panneaux des signaux.
+- Précise les modèles concernés dans les aides des réglages, notamment pour les zones de travaux.
+- **Nouvelle partie requise :** les sauvegardes utilisant les anciens modèles de signaux ne sont pas compatibles avec ce nouveau catalogue.
+
+Prérequis : **SDK 0.9.0-alpha.2** (alpha) ou plus récent, inférieur à **0.10.0**.
+
+### English
+
+- Uses the reference names **AB T_A 011100000**, **AB T_C 101000000** and **AB T_C 111000000** in the construction catalogue and signal panels.
+- Clarifies which models each setting applies to, including work-zone coverage.
+- **A new game is required:** saves using the previous signal models are incompatible with this new catalogue.
+
+Requires **SDK 0.9.0-alpha.2** (alpha) or later, below **0.10.0**.
+
 ## [0.2.0-alpha.6] - 2026-10-08
 
 - Nouveau nom : **AB Signalisation lumineuse**, avec le préfixe **AB** dans les noms des signaux. Le mod reste en développement.

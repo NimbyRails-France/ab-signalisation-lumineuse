@@ -3,10 +3,10 @@
   "name": "AB Signalisation lumineuse",
   "developmentStatus": "in-development",
   "modId": "SignalisationFrancaiseRealiste",
-  "version": "0.2.0-alpha.6",
+  "version": "0.2.0-alpha.7",
   "module": "SignalisationFrancaiseRealisteMod",
   "language": "kotlin-native",
-  "sdkMin": "0.9.0-alpha.1",
+  "sdkMin": "0.9.0-alpha.2",
   "sdkMaxExclusive": "0.10.0",
   "gameSha256": [
     "fff49ac21720abfc824c2b4f68b862727630eb0db71cfe1f9ea8f685d0db10ae"

@@ -5,9 +5,15 @@ import kotlinx.cinterop.*
 import kotlin.test.*
 import nimby.*
 import sfr.FrenchSignalsMod
-import sfr.signals.bal.*
-import sfr.signals.carreavertissement.*
-import sfr.signals.carrebal.CarreBal
+import sfr.signals.t_a.s.c.v.`011100000`.Signal as T_A_011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Aspect as Aspect011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Reason as Reason011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Decision as Decision011100000
+import sfr.signals.t_c.c.b.v.`101000000`.Signal as T_C_101000000
+import sfr.signals.t_c.c.b.v.`101000000`.Aspect as Aspect101000000
+import sfr.signals.t_c.c.b.v.`101000000`.Reason as Reason101000000
+import sfr.signals.t_c.c.b.v.`101000000`.Decision as Decision101000000
+import sfr.signals.t_c.c.b.v.`111000000`.Signal as T_C_111000000
 
 private enum class ForeignAspect { Open }
 private enum class ForeignReason { Normal }
@@ -46,23 +52,23 @@ class ModelIsolationTests {
     }
 
     @Test fun sameLocalCodeKeepsItsModelAndCannotBeCastToAnother() {
-        assertEquals(BalAspect.Unknown.ordinal, CarreAspect.Closed.ordinal)
-        val bal = mod.unknownDecision(BalSignals.TYPE)
-        val carre = mod.unknownDecision(CarreAvertissement.TYPE)
+        assertEquals(Aspect011100000.Unknown.ordinal, Aspect101000000.Closed.ordinal)
+        val bal = mod.unknownDecision(T_A_011100000.TYPE)
+        val carre = mod.unknownDecision(T_C_101000000.TYPE)
         assertNotEquals(bal, carre)
-        assertEquals(BalAspect.Unknown, mod.indication(bal)!!.of(BalSignals.model)!!.aspect)
-        assertEquals(CarreAspect.Closed, mod.indication(carre)!!.of(CarreAvertissement.model)!!.aspect)
-        assertNull(mod.indication(bal)!!.of(CarreAvertissement.model))
-        assertNull(mod.indication(carre)!!.of(BalSignals.model))
+        assertEquals(Aspect011100000.Unknown, mod.indication(bal)!!.of(T_A_011100000.model)!!.aspect)
+        assertEquals(Aspect101000000.Closed, mod.indication(carre)!!.of(T_C_101000000.model)!!.aspect)
+        assertNull(mod.indication(bal)!!.of(T_C_101000000.model))
+        assertNull(mod.indication(carre)!!.of(T_A_011100000.model))
         assertNull(mod.indication(Decision(bal.aspect, carre.reason)))
         assertFailsWith<IllegalArgumentException> { mod.texture(Decision(bal.aspect, carre.reason), 0, 500) }
-        val impostor = signalModel(BalSignals.TYPE, "Other", "other-textures",
+        val impostor = signalModel(T_A_011100000.TYPE, "Other", "other-textures",
             Indication(ForeignAspect.Open, ForeignReason.Normal)) {
             rules { Indication(ForeignAspect.Open, ForeignReason.Normal) }; images { "other.svg" }
         }
         assertNull(mod.indication(bal)!!.of(impostor)) // Same ID does not prove Kotlin type identity.
         assertFailsWith<IllegalArgumentException> {
-            signalMod("duplicate", "Duplicate") { signal(BalSignals.model); signal(impostor) }
+            signalMod("duplicate", "Duplicate") { signal(T_A_011100000.model); signal(impostor) }
         }
     }
 
@@ -71,12 +77,12 @@ class ModelIsolationTests {
             Indication(ForeignAspect.Open, ForeignReason.Normal)) {
             rules { Indication(ForeignAspect.Open, ForeignReason.Normal) }; images { "foreign.svg" }
         }
-        val combined = signalMod("mixed", "Mixed") { signal(BalSignals.model); signal(foreign) }
+        val combined = signalMod("mixed", "Mixed") { signal(T_A_011100000.model); signal(foreign) }
         val result = combined.evaluateNetwork(listOf(
-            Signal(1, 2, observation = Observation(Occupancy.Clear, true, true), type = BalSignals.TYPE),
+            Signal(1, 2, observation = Observation(Occupancy.Clear, true, true), type = T_A_011100000.TYPE),
             Signal(2, type = foreign.type.id)
         ))
-        assertEquals(BalReason.DownstreamUnknown, combined.indication(result[0])!!.of(BalSignals.model)!!.reason)
+        assertEquals(Reason011100000.DownstreamUnknown, combined.indication(result[0])!!.of(T_A_011100000.model)!!.reason)
     }
 
     @Test fun balCanReadAnUnrelatedModelsDeclaredInstructionThroughSdkNeighbour() {
@@ -98,26 +104,26 @@ class ModelIsolationTests {
             }
             images { "inspector.svg" }
         }
-        val combined = signalMod("mixed", "Mixed") { signal(BalSignals.model); signal(foreign); signal(inspector) }
+        val combined = signalMod("mixed", "Mixed") { signal(T_A_011100000.model); signal(foreign); signal(inspector) }
         val result = combined.evaluateNetwork(listOf(
-            Signal(1, 2, observation = Observation(Occupancy.Clear, true, true), type = BalSignals.TYPE),
+            Signal(1, 2, observation = Observation(Occupancy.Clear, true, true), type = T_A_011100000.TYPE),
             Signal(2, type = foreign.type.id), Signal(3, 2, type = inspector.type.id)
         ))
-        assertEquals(BalAspect.A, combined.indication(result[0])!!.of(BalSignals.model)!!.aspect)
+        assertEquals(Aspect011100000.A, combined.indication(result[0])!!.of(T_A_011100000.model)!!.aspect)
         assertEquals(2L, seen!!.id)
         assertEquals(foreign.type, seen!!.type)
         assertEquals(AutomaticDriving.stop(), seen!!.drivingRule)
         assertEquals(ForeignAspect.Open, seen!!.of(foreign)!!.aspect)
-        assertNull(seen!!.of(BalSignals.model))
+        assertNull(seen!!.of(T_A_011100000.model))
     }
 
     @Test fun mixedCyclesAndMissingLinksUseEachModelsOwnFallback() {
         val first = signalModel("first", "First", "first-textures",
-            BalDecision(BalAspect.Unknown, BalReason.InvalidTopology)) {
+            Decision011100000(Aspect011100000.Unknown, Reason011100000.InvalidTopology)) {
             rules { null }; images { "first.svg" }
         }
         val second = signalModel("second", "Second", "second-textures",
-            CarreDecision(CarreAspect.Closed, CarreReason.InvalidTopology)) {
+            Decision101000000(Aspect101000000.Closed, Reason101000000.InvalidTopology)) {
             rules { null }; images { "second.svg" }
         }
         val mixed = signalMod("mixed", "Mixed") { signal(first); signal(second) }
@@ -126,8 +132,8 @@ class ModelIsolationTests {
             listOf(Signal(1, 99, type = "first"), Signal(2, 99, type = "second"))
         )) {
             val results = mixed.evaluateNetwork(signals)
-            assertEquals(BalReason.InvalidTopology, mixed.indication(results[0])!!.of(first)!!.reason)
-            assertEquals(CarreReason.InvalidTopology, mixed.indication(results[1])!!.of(second)!!.reason)
+            assertEquals(Reason011100000.InvalidTopology, mixed.indication(results[0])!!.of(first)!!.reason)
+            assertEquals(Reason101000000.InvalidTopology, mixed.indication(results[1])!!.of(second)!!.reason)
             assertEquals(listOf("first.svg", "second.svg"), results.map { mixed.texture(it, 0, 500) })
         }
     }
@@ -136,7 +142,7 @@ class ModelIsolationTests {
         assertEquals(8, nimby.internal.version()) // Numeric settings and network preparation require the matching adapter.
         val raw = allocArray<IntVar>(2)
         val local = allocArray<IntVar>(2)
-        for ((index, model) in listOf(BalSignals.model, CarreAvertissement.model, CarreBal.model).withIndex()) {
+        for ((index, model) in listOf(T_A_011100000.model, T_C_101000000.model, T_C_111000000.model).withIndex()) {
             assertEquals(0, nimby.internal.fallbackType(index, 1, raw))
             val expected = mod.invalidNetworkDecision(model.type.id)
             assertEquals(expected, Decision(raw[0], raw[1]))
@@ -151,16 +157,16 @@ class ModelIsolationTests {
         val first = allocArray<ByteVar>(96)
         val alternate = allocArray<ByteVar>(96)
         val period = alloc<LongVar>()
-        val flash = mod.evaluate(BalSignals.TYPE, mapOf("greenFlashWork" to true),
-            Observation(Occupancy.Clear, true, true, next = BalAspect.VL.ordinal))
+        val flash = mod.evaluate(T_A_011100000.TYPE, mapOf("greenFlashWork" to true),
+            Observation(Occupancy.Clear, true, true, next = Aspect011100000.VL.ordinal))
         assertEquals(0, nimby.internal.textureAnimation(flash.aspect, flash.reason, first, alternate, 96, period.ptr))
-        assertEquals("imgs/ca/sem_bal/tex05.svg", first.toKString())
-        assertEquals("imgs/ca/sem_bal/tex06.svg", alternate.toKString())
+        assertEquals("imgs/t_a/s/c/v/011100000/tex05.svg", first.toKString())
+        assertEquals("imgs/t_a/s/c/v/011100000/tex06.svg", alternate.toKString())
         assertEquals(500L, period.value)
         assertTrue(nimby.internal.textureAnimation(flash.aspect, flash.reason, first, alternate, 1, period.ptr) < 0)
-        val fixed = mod.unknownDecision(CarreAvertissement.TYPE)
+        val fixed = mod.unknownDecision(T_C_101000000.TYPE)
         assertEquals(0, nimby.internal.textureAnimation(fixed.aspect, fixed.reason, first, alternate, 96, period.ptr))
-        assertEquals("imgs/cc/cs_a/tex01.svg", first.toKString())
+        assertEquals("imgs/t_c/c/b/v/101000000/tex01.svg", first.toKString())
         assertEquals(first.toKString(), alternate.toKString())
         assertEquals(0L, period.value)
     }

@@ -4,17 +4,20 @@ package sfr.tests
 import kotlin.test.*
 import nimby.*
 import sfr.FrenchSignalsMod
-import sfr.signals.bal.*
-import sfr.signals.carreavertissement.CarreAvertissement
+import sfr.signals.t_a.s.c.v.`011100000`.Signal as T_A_011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Aspect as Aspect011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Reason as Reason011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Panel as Panel011100000
+import sfr.signals.t_c.c.b.v.`101000000`.Signal as T_C_101000000
 import kotlinx.cinterop.*
 import kotlin.random.Random
 
 class WorkZoneTests {
     private val mod = FrenchSignalsMod()
     private fun chain(count: Int = 8) = (1..count).map { Signal(it.toLong(), if(it == count) 0 else it+1L,
-        emptyMap(), Observation(if(it == count) Occupancy.Occupied else Occupancy.Clear, true, true), type = BalSignals.TYPE) }
+        emptyMap(), Observation(if(it == count) Occupancy.Occupied else Occupancy.Clear, true, true), type = T_A_011100000.TYPE) }
     private fun List<Signal>.source(id: Long, count: Int, enabled: Boolean = true) = map {
-        if(it.id != id) it else it.copy(settings = BalPanel.workBlocks.withValue(it.settings + ("greenFlashWork" to enabled), count)) }
+        if(it.id != id) it else it.copy(settings = Panel011100000.workBlocks.withValue(it.settings + ("greenFlashWork" to enabled), count)) }
     private fun List<Signal>.covered() = mod.prepareObservedNetwork(this).filter { it.settings["greenFlashWork"] == true }.map { it.id }.toSet()
 
     @Test fun exactCountRemovalOverlapAndOrder() {
@@ -31,11 +34,11 @@ class WorkZoneTests {
     }
     @Test fun derivedValuesDoNotBecomeNewSourcesAndAbsentProfilesUseDefaults() {
         val input = chain().source(1,1).map { if(it.id==2L) it.copy(
-            settings=BalPanel.workBlocks.withValue(emptyMap(),64)) else it }
+            settings=Panel011100000.workBlocks.withValue(emptyMap(),64)) else it }
         assertEquals(setOf(1L,2L), input.covered())
         val absent = chain().source(1,2).map { if(it.id==2L) it.copy(settingsStatus=SettingsStatus.Absent) else it }
         val result = mod.evaluateNetwork(absent)
-        assertEquals(BalReason.Work160, mod.indication(result[1])!!.of(BalSignals.model)!!.reason)
+        assertEquals(Reason011100000.Work160, mod.indication(result[1])!!.of(T_A_011100000.model)!!.reason)
     }
     @Test fun unknownTopologyUnavailableSettingsAndCyclesStopTraversal() {
         val base = chain().source(1,64)
@@ -49,17 +52,17 @@ class WorkZoneTests {
         assertFailsWith<IllegalArgumentException> { mod.prepareObservedNetwork(base+base.first()) }
     }
     @Test fun stopsAndAnnouncementsRemainMoreRestrictive() {
-        val results = mod.evaluateNetwork(chain().source(1,64)).map { mod.indication(it)!!.of(BalSignals.model)!! }
-        assertTrue(results.take(6).all { it.aspect==BalAspect.GreenFlash && it.reason==BalReason.Work160 })
-        assertEquals(BalAspect.A,results[6].aspect)
-        assertEquals(BalAspect.S,results[7].aspect)
+        val results = mod.evaluateNetwork(chain().source(1,64)).map { mod.indication(it)!!.of(T_A_011100000.model)!! }
+        assertTrue(results.take(6).all { it.aspect==Aspect011100000.GreenFlash && it.reason==Reason011100000.Work160 })
+        assertEquals(Aspect011100000.A,results[6].aspect)
+        assertEquals(Aspect011100000.S,results[7].aspect)
         val forced = chain().source(1,3).map { if(it.id==2L) it.copy(observation=it.observation.copy(forcedStop=true)) else it }
-        assertEquals(BalAspect.S,mod.indication(mod.evaluateNetwork(forced)[1])!!.of(BalSignals.model)!!.aspect)
+        assertEquals(Aspect011100000.S,mod.indication(mod.evaluateNetwork(forced)[1])!!.of(T_A_011100000.model)!!.aspect)
     }
     @Test fun boundsAndConstructionDefaults() {
-        for(value in listOf(0,1,2,31,63,64)) assertEquals(value,BalPanel.workBlocks.read(BalPanel.workBlocks.withValue(emptyMap(),value)))
-        assertFailsWith<IllegalArgumentException> { BalPanel.workBlocks.withValue(emptyMap(),65) }
-        assertFailsWith<IllegalArgumentException> { BalPanel.workBlocks.withValue(emptyMap(),-1) }
+        for(value in listOf(0,1,2,31,63,64)) assertEquals(value,Panel011100000.workBlocks.read(Panel011100000.workBlocks.withValue(emptyMap(),value)))
+        assertFailsWith<IllegalArgumentException> { Panel011100000.workBlocks.withValue(emptyMap(),65) }
+        assertFailsWith<IllegalArgumentException> { Panel011100000.workBlocks.withValue(emptyMap(),-1) }
         assertTrue(mod.signalTypes.all { it.construction!!.size==4 })
         assertTrue(mod.signalTypes.all { it.construction!!.left })
     }
@@ -69,20 +72,20 @@ class WorkZoneTests {
         repeat(120) {
             val input = chain(96).map { signal -> signal.copy(
                 nextSignal = random.nextInt(0, 102).toLong(),
-                settings = BalPanel.workBlocks.withValue(mapOf("greenFlashWork" to (random.nextInt(4) == 0)), random.nextInt(65)),
+                settings = Panel011100000.workBlocks.withValue(mapOf("greenFlashWork" to (random.nextInt(4) == 0)), random.nextInt(65)),
                 settingsStatus = SettingsStatus.entries[random.nextInt(SettingsStatus.entries.size)],
                 observation = signal.observation.copy(fresh = random.nextInt(10) != 0, routeKnown = random.nextInt(10) != 0),
-                type = if (random.nextInt(10) == 0) CarreAvertissement.TYPE else BalSignals.TYPE)
+                type = if (random.nextInt(10) == 0) T_C_101000000.TYPE else T_A_011100000.TYPE)
             }
             val byId = input.associateBy { it.id }
             val expected = input.filter { it.settings["greenFlashWork"] == true }.map { it.id }.toMutableSet()
-            for (source in input.filter { it.type == BalSignals.TYPE && it.settingsStatus == SettingsStatus.Present && it.settings["greenFlashWork"] == true }) {
+            for (source in input.filter { it.type == T_A_011100000.TYPE && it.settingsStatus == SettingsStatus.Present && it.settings["greenFlashWork"] == true }) {
                 var cursor = source
                 val visited = mutableSetOf(source.id)
-                for (step in 0 until BalPanel.workBlocks.read(source.settings)) {
+                for (step in 0 until Panel011100000.workBlocks.read(source.settings)) {
                     if (!cursor.observation.fresh || !cursor.observation.routeKnown || cursor.settingsStatus == SettingsStatus.Unavailable) break
                     val next = byId[cursor.nextSignal] ?: break
-                    if (next.type != BalSignals.TYPE || next.settingsStatus == SettingsStatus.Unavailable || !visited.add(next.id)) break
+                    if (next.type != T_A_011100000.TYPE || next.settingsStatus == SettingsStatus.Unavailable || !visited.add(next.id)) break
                     expected.add(next.id)
                     cursor = next
                 }
@@ -94,13 +97,13 @@ class WorkZoneTests {
 
     @Test fun denseSavedSourcesAreNotCopied() {
         val input = chain(4096).source(1, 64).map { it.copy(
-            settings = BalPanel.workBlocks.withValue(mapOf("greenFlashWork" to true), 64)) }
+            settings = Panel011100000.workBlocks.withValue(mapOf("greenFlashWork" to true), 64)) }
         val prepared = mod.prepareObservedNetwork(input)
         input.indices.forEach { assertSame(input[it], prepared[it]) }
     }
     @Test fun nativeNetworkPreparationPreservesInputsAndEncodesDerivedSettings() = memScoped {
         val input = chain(4).source(1,2).map { if(it.id==2L) it.copy(settingsStatus=SettingsStatus.Absent) else it }
-        val declaration = mod.signalTypes.first { it.id==BalSignals.TYPE }
+        val declaration = mod.signalTypes.first { it.id==T_A_011100000.TYPE }
         val typeIndex = mod.signalTypes.indexOf(declaration)
         val ids = allocArray<LongVar>(16); val fields = allocArray<IntVar>(36)
         val masks = allocArray<LongVar>(4); val statuses = allocArray<IntVar>(4)

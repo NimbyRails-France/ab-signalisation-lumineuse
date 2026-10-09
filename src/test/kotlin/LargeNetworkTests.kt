@@ -5,33 +5,36 @@ import kotlinx.cinterop.*
 import kotlin.test.*
 import nimby.*
 import sfr.FrenchSignalsMod
-import sfr.signals.bal.*
+import sfr.signals.t_a.s.c.v.`011100000`.Signal as T_A_011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Aspect as Aspect011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Reason as Reason011100000
+import sfr.signals.t_a.s.c.v.`011100000`.Panel as Panel011100000
 
 class LargeNetworkTests {
     private val mod = FrenchSignalsMod()
     private fun chain(count: Int) = List(count) { i -> Signal(i + 1L, if(i + 1 == count) 0 else i + 2L,
         observation = Observation(if(i + 1 == count) Occupancy.Occupied else Occupancy.Clear, true, true),
-        settingsStatus = SettingsStatus.Absent, type = BalSignals.TYPE) }
+        settingsStatus = SettingsStatus.Absent, type = T_A_011100000.TYPE) }
 
     @Test fun fourThousandSignalsKeepStopsWarningsAndInputOrder() {
         val input = chain(4096)
-        val result = mod.evaluateNetwork(input).map { mod.indication(it)!!.of(BalSignals.model)!!.aspect }
+        val result = mod.evaluateNetwork(input).map { mod.indication(it)!!.of(T_A_011100000.model)!!.aspect }
         assertEquals(4096, result.size)
-        assertTrue(result.take(4094).all { it == BalAspect.VL })
-        assertEquals(listOf(BalAspect.A, BalAspect.S), result.takeLast(2))
-        assertEquals(result.reversed(), mod.evaluateNetwork(input.reversed()).map { mod.indication(it)!!.of(BalSignals.model)!!.aspect })
+        assertTrue(result.take(4094).all { it == Aspect011100000.VL })
+        assertEquals(listOf(Aspect011100000.A, Aspect011100000.S), result.takeLast(2))
+        assertEquals(result.reversed(), mod.evaluateNetwork(input.reversed()).map { mod.indication(it)!!.of(T_A_011100000.model)!!.aspect })
         assertFailsWith<IllegalArgumentException> { mod.evaluateNetwork(chain(4097)) }
         val cycle = input.map { it.copy(nextSignal = if(it.id == 4096L) 1 else it.nextSignal, observation = Observation(Occupancy.Clear, true, true)) }
-        assertTrue(mod.evaluateNetwork(cycle).all { mod.indication(it)!!.of(BalSignals.model)!!.reason == BalReason.InvalidTopology })
+        assertTrue(mod.evaluateNetwork(cycle).all { mod.indication(it)!!.of(T_A_011100000.model)!!.reason == Reason011100000.InvalidTopology })
     }
 
     @Test fun largeWorkZonesStayBoundedAndDoNotChangeTheSavedInput() {
         val input = chain(4096).map { if(it.id % 64 != 1L) it else it.copy(settingsStatus = SettingsStatus.Present,
-            settings = BalPanel.workBlocks.withValue(mapOf("greenFlashWork" to true), 64)) }
+            settings = Panel011100000.workBlocks.withValue(mapOf("greenFlashWork" to true), 64)) }
         val prepared = mod.prepareObservedNetwork(input)
         assertTrue(prepared.all { it.settings["greenFlashWork"] == true })
         assertEquals(64, input.count { it.settings["greenFlashWork"] == true })
-        assertEquals(listOf(BalAspect.A, BalAspect.S), mod.evaluateNetwork(input).takeLast(2).map { mod.indication(it)!!.of(BalSignals.model)!!.aspect })
+        assertEquals(listOf(Aspect011100000.A, Aspect011100000.S), mod.evaluateNetwork(input).takeLast(2).map { mod.indication(it)!!.of(T_A_011100000.model)!!.aspect })
     }
 
     @Test fun nativePreparationAccepts4096AndRejectsOversizeBeforeDereferencing() = memScoped {
