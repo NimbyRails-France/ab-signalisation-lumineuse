@@ -1,10 +1,12 @@
 package sfr.signals.t_c.c.b.v.`111000000`
 
-import sfr.signals.common.bal.BalSettings
+import sfr.signals.common.bal.CarreBalSettings
+import sfr.signals.common.bal.CarreBalReturnMode
 
-internal data class Settings(val bal: BalSettings, val forceClosed: Boolean) {
-    companion object {
-        fun from(values: Map<String, Boolean>) = Settings(
-            BalSettings.from(values), values[Panel.forceClosed.name] == true)
-    }
+internal typealias ReturnMode = CarreBalReturnMode
+
+/** Les valeurs et clés restent déclarées dans le panneau de ce modèle. */
+internal object Settings {
+    fun from(values: Map<String, Boolean>) =
+        CarreBalSettings.from(values, Panel.forceClosed, Panel.returnToSemaphore)
 }

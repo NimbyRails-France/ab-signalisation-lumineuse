@@ -4,18 +4,20 @@ import nimby.*
 import sfr.integrations.offerSignalPlacement
 
 
-/** Même cantonnement que le BAL ; le carré ajoute une fermeture absolue. */
+/** Même calcul BAL ouvert dans les deux modes. Le retour au carré remplace
+ * S/S cli par C et attend une tête dans les deux cantons avant l'ouverture. */
 internal object Signal {
     const val TYPE = "sfr.t_c.c.b.v.111000000"
     const val TEXTURES = "sfr_t_c_c_b_v_111000000"
 
     val model = signalModel(
         SignalType(TYPE, tr("signal.t_c.c.b.v.111000000.name"), TEXTURES, Panel.checkboxes),
-        fallback = Decision(Aspect.Unknown, Reason.MissingObservation),
-        invalidNetwork = Decision(Aspect.Unknown, Reason.InvalidTopology)
+        fallback = Decision(Aspect.Closed, Reason.MissingObservation),
+        invalidNetwork = Decision(Aspect.Closed, Reason.InvalidTopology)
     ) {
         number(Panel.workBlocks)
         construction(Textures.catalogue, name = tr("signal.t_c.c.b.v.111000000.name"), size = 4, left = true)
+        observeApproach(blocks = 2)
         offerSignalPlacement()
         evaluate { settings, observation, next ->
             Rules.evaluate(settings, observation, next)

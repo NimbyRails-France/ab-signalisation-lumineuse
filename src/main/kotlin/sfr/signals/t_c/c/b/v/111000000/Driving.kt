@@ -5,5 +5,5 @@ import sfr.signals.common.bal.*
 
 internal object Driving {
     fun driving(value: Decision): DrivingRule? = if (value.aspect == Aspect.Closed)
-        AutomaticDriving.stop() else BalDriving.fromDecision(BalDecision(requireNotNull(value.aspect.bal), value.reason.bal))
+        AutomaticDriving.stop() else BalDriving.fromDecision(BalDecision(requireNotNull(value.aspect.bal), requireNotNull(value.reason.bal)))
 }

@@ -14,6 +14,8 @@ import sfr.signals.t_c.c.b.v.`101000000`.Aspect as Aspect101000000
 import sfr.signals.t_c.c.b.v.`101000000`.Reason as Reason101000000
 import sfr.signals.t_c.c.b.v.`101000000`.Decision as Decision101000000
 import sfr.signals.t_c.c.b.v.`111000000`.Signal as T_C_111000000
+import sfr.signals.t_c.c.b.v.`111001000`.Signal as T_C_111001000
+import sfr.signals.uti.sidm.b.z.`200000000`.Markers
 
 private enum class ForeignAspect { Open }
 private enum class ForeignReason { Normal }
@@ -139,10 +141,18 @@ class ModelIsolationTests {
     }
 
     @Test fun nativeExportsKeepModelFallbackAndRecipeCodes() = memScoped {
-        assertEquals(8, nimby.internal.version()) // Numeric settings and network preparation require the matching adapter.
+        assertEquals(14, nimby.internal.version()) // Selected-route observations require the matching adapter.
+        assertEquals(0, nimby.internal.trainLengthDeclarationVersion()) // Route observations do not declare a train-length policy.
         val raw = allocArray<IntVar>(2)
         val local = allocArray<IntVar>(2)
-        for ((index, model) in listOf(T_A_011100000.model, T_C_101000000.model, T_C_111000000.model).withIndex()) {
+        val visibility = allocArray<ByteVar>(129)
+        for ((index, model) in listOf(T_A_011100000.model, T_C_101000000.model, T_C_111000000.model,
+            T_C_111001000.model, Markers.t32, Markers.t33).withIndex()) {
+            for ((box, declaration) in model.type.checkboxes.withIndex()) {
+                assertEquals(declaration.visibleWhen.encodeToByteArray().size,
+                    nimby.internal.checkboxVisibleWhen(index, box, visibility, 129))
+                assertEquals(declaration.visibleWhen, visibility.toKString())
+            }
             assertEquals(0, nimby.internal.fallbackType(index, 1, raw))
             val expected = mod.invalidNetworkDecision(model.type.id)
             assertEquals(expected, Decision(raw[0], raw[1]))
@@ -151,7 +161,7 @@ class ModelIsolationTests {
             assertEquals(mod.indication(expected)!!.reason.ordinal, local[1])
             assertEquals(1, nimby.internal.forceType(index, 0, raw)) // SFR no longer accepts forced states.
         }
-        assertTrue(nimby.internal.fallbackType(3, 1, raw) < 0)
+        assertTrue(nimby.internal.fallbackType(6, 1, raw) < 0)
         assertTrue(nimby.internal.fallbackType(0, 2, raw) < 0)
         assertTrue(nimby.internal.localDecision(0, 0, local) < 0)
         val first = allocArray<ByteVar>(96)

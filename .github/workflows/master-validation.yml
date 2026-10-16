@@ -1,0 +1,89 @@
+# Test artifacts only. This workflow does not publish a release or a Hub catalogue.
+name: Master Windows validation
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: master-windows-validation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
+    timeout-minutes: 120
+    env:
+      CI_REPO: ${{ github.repository }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_BRANCH: ${{ github.ref_name }}
+      CI_PIPELINE_EVENT: push
+      WINEPREFIX: /tmp/nrf-wine
+      WINEDEBUG: '-all'
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dfile.encoding=UTF-8'
+    steps:
+      - name: Install checkout prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates python3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check out the exact SDK source revision
+        run: |
+          python3 -c "import pathlib,re; p=pathlib.Path('.woodpecker/sdk-revision.txt').read_text().strip(); assert re.fullmatch('[0-9a-f]{40}',p), 'SDK pin must be a full commit SHA'"
+          git clone https://github.com/NimbyRails-France/sdk.git .ci/sdk
+          git -C .ci/sdk checkout --detach "$(cat .woodpecker/sdk-revision.txt)"
+          test "$(git -C .ci/sdk rev-parse HEAD)" = "$(cat .woodpecker/sdk-revision.txt)"
+      - name: Prepare isolated Windows cross-compilers
+        run: sh .ci/sdk/.github/ci/bootstrap.sh "$PWD/.ci/sdk"
+      - name: Build and verify the SDK from source
+        working-directory: .ci/sdk
+        env:
+          NRF_SOURCE_VALIDATION_ONLY: '1'
+        run: sh .woodpecker/build.sh
+      - name: Build and verify AB against the same SDK
+        run: |
+          export JAVA_HOME="$(python3 .ci/sdk/.woodpecker/toolchain.py java-linux)"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          export NRF_KOTLIN_HOME="$(python3 .ci/sdk/.woodpecker/toolchain.py kotlin-linux)"
+          sh gradlew windowsTestsWithWine verifyNativeMod \
+            -PnrfSdkDir="$PWD/.ci/sdk/build/kotlin-kit" \
+            -PnrfWineRunner="$PWD/.ci/sdk/.woodpecker/wine-run.py" \
+            -Pkotlin.native.home="$NRF_KOTLIN_HOME" \
+            --no-daemon --max-workers=2 --console=plain
+          git rev-parse HEAD > build/gradle/ab-source-revision.txt
+          git -C .ci/sdk rev-parse HEAD > build/gradle/sdk-source-revision.txt
+          git -C .ci/sdk rev-parse HEAD > .ci/sdk/build/sdk-source-revision.txt
+      - name: Preserve verified AB files for testing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ab-master-windows-test
+          path: |
+            build/gradle/mod/release/
+            build/gradle/ab-source-revision.txt
+            build/gradle/sdk-source-revision.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve the matching SDK kit and runtime
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sdk-master-windows-test
+          path: |
+            .ci/sdk/build/kotlin-kit/
+            .ci/sdk/build/install/bin/
+            .ci/sdk/build/sdk-source-revision.txt
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve available verification reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: master-verification-reports
+          path: |
+            build/gradle/reports/
+            build/gradle/test-results/
+            .ci/sdk/build/ci/Testing/Temporary/LastTest.log
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

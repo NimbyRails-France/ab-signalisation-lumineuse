@@ -12,5 +12,9 @@ internal enum class Reason(val description: String) {
     RouteUnknown("limite du canton ou itinéraire inconnu"),
     BlockUnknown("occupation du canton inconnue"),
     AwaitingApproach("carré fermé au repos, aucune approche confirmée"),
-    ApproachConfirmed("approche en amont confirmée et canton protégé libre")
+    ApproachConfirmed("approche en amont confirmée et canton protégé libre"),
+    // Ancien motif réservé : il n'autorise plus d'ouverture. Ne pas le retirer
+    // ni renuméroter les codes utilisés par les diagnostics existants.
+    ApproachUnknownDownstream("approche en amont confirmée, aval inconnu toléré par ce modèle"),
+    RouteConflict("itinéraire croisé occupé ou réservé")
 }

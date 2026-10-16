@@ -5,7 +5,10 @@ import sfr.signals.t_a.s.c.v.`011100000`.Panel as Panel011100000
 import sfr.signals.t_a.s.c.v.`011100000`.Settings as Settings011100000
 import sfr.signals.t_c.c.b.v.`101000000`.Signal as T_C_101000000
 import sfr.signals.t_c.c.b.v.`101000000`.Aspect as Aspect101000000
+import sfr.signals.t_c.c.b.v.`101000000`.Reason as Reason101000000
 import sfr.signals.t_c.c.b.v.`111000000`.Signal as T_C_111000000
+import sfr.signals.t_c.c.b.v.`111001000`.Signal as T_C_111001000
+import sfr.signals.uti.sidm.b.z.`200000000`.Markers
 
 import kotlin.test.*
 import nimby.*
@@ -22,14 +25,16 @@ class SignalTypesTests {
         2, 3, mapOf("active" to true), observation, type = T_C_101000000.TYPE)
     private fun indication(signal: Signal) = mod.indication(mod.decide(signal, null)!!)!!.aspect
 
-    @Test fun oneModDeclaresThreeIndependentTypes() {
+    @Test fun fourProtectingModelsAndTwoPassiveMarkersKeepTheirDeclarationsIndependent() {
         validateSignalTypes(mod.signalTypes)
         assertEquals("signalisationfrancaiserealiste",mod.id)
         assertTrue(mod.signalTypes.none { it.id==mod.id })
-        assertEquals(setOf(T_A_011100000.TYPE,T_C_101000000.TYPE,T_C_111000000.TYPE),mod.signalTypes.map { it.id }.toSet())
+        assertEquals(listOf(T_A_011100000.TYPE,T_C_101000000.TYPE,T_C_111000000.TYPE,T_C_111001000.TYPE,
+            Markers.T32_TYPE, Markers.T33_TYPE), mod.signalTypes.map { it.id })
         // This branch deliberately starts a new-map catalogue, without the old
         // C++ identifier. It must not accidentally restore a retired model.
-        assertEquals(listOf("sfr_t_a_s_c_v_011100000", "sfr_t_c_c_b_v_101000000", "sfr_t_c_c_b_v_111000000"), mod.signalTypes.map { it.textureSet })
+        assertEquals(listOf("sfr_t_a_s_c_v_011100000", "sfr_t_c_c_b_v_101000000", "sfr_t_c_c_b_v_111000000", "sfr_t_c_c_b_v_111001000",
+            Markers.T32_TEXTURES, Markers.T33_TEXTURES), mod.signalTypes.map { it.textureSet })
         assertEquals(listOf("greenFlashBlock", "greenFlashWork", "yellowFlashEnabled", "redFlashEnabled"),
             mod.signalTypes[0].checkboxes.take(4).map { it.name })
         assertEquals(listOf(Panel011100000.workBlocks), mod.signalTypes[0].numbers)
@@ -37,6 +42,7 @@ class SignalTypesTests {
         assertTrue(mod.signalTypes[1].checkboxes.single().defaultValue)
         assertTrue(mod.signalTypes[1].observeApproach)
         assertEquals(2, mod.signalTypes[1].approachBlocks)
+        assertEquals(listOf(false, false, false, true, false, false), mod.signalTypes.map { it.observeRoute })
     }
 
     @Test fun carreIsClosedAtRestAndOnlyOpensWithObservedApproach() {
@@ -58,19 +64,71 @@ class SignalTypesTests {
         assertEquals(Aspect101000000.Closed, indication(rest))
     }
 
-    @Test fun carreAcceptsUnknownDownstreamOnlyWithFreshApproach() {
+    @Test fun carreRequiresKnownClearDownstreamEvenWithFreshApproach() {
         val endOfBal = carre(Observation(Occupancy.Unknown, true, false, approachingTrain = approaching))
             .copy(nextSignal = 0)
-        assertEquals(Aspect101000000.Warning, indication(endOfBal))
-        assertEquals(Aspect101000000.Warning, indication(endOfBal.copy(observation = endOfBal.observation.copy(routeKnown = true))))
+        assertEquals(Aspect101000000.Closed, indication(endOfBal))
+        assertEquals(Aspect101000000.Closed, indication(endOfBal.copy(observation = endOfBal.observation.copy(routeKnown = true))))
+        assertEquals(Aspect101000000.Closed, indication(endOfBal.copy(observation = endOfBal.observation.copy(block = Occupancy.Clear))))
         assertEquals(Aspect101000000.Closed, indication(endOfBal.copy(observation = endOfBal.observation.copy(block = Occupancy.Occupied))))
         assertEquals(Aspect101000000.Closed, indication(endOfBal.copy(observation = endOfBal.observation.copy(fresh = false))))
         // Head passage removes the approach, even while its tail remains behind.
         val afterPassage = endOfBal.copy(observation = endOfBal.observation.copy(approachingTrain = null))
         assertEquals(Aspect101000000.Closed, indication(afterPassage))
-        assertEquals(Aspect101000000.Warning, indication(afterPassage.copy(observation = afterPassage.observation.copy(approachingTrain = approaching + 1))))
-        // The tolerance belongs to this model; it must not leak to BAL.
+        assertEquals(Aspect101000000.Closed, indication(afterPassage.copy(observation = afterPassage.observation.copy(approachingTrain = approaching + 1))))
+        val known = carre(Observation(Occupancy.Clear, true, true, approachingTrain = approaching + 1))
+        assertEquals(Aspect101000000.Warning, indication(known))
+        // Ordinary BAL also retains its restrictive unknown-data handling.
         assertNotEquals(Aspect.VL, mod.evaluate(emptyMap(), Observation(Occupancy.Unknown, true, false)).balAspect)
+    }
+    @Test fun qualifiedCrossedRefusalClosesAndMissingCauseDoesNotClearUnknownDownstream() {
+        val approach = carre(Observation(Occupancy.Unknown, true, false, approachingTrain = approaching)).copy(nextSignal = 0)
+        for (conflict in RouteConflict.entries) {
+            val blocked = approach.copy(observation = approach.observation.copy(routeConflict = conflict))
+            val decision = assertNotNull(mod.decide(blocked, null))
+            val indication = assertNotNull(mod.indication(decision)?.of(T_C_101000000.model))
+            assertEquals(Aspect101000000.Closed, indication.aspect)
+            assertEquals(Reason101000000.RouteConflict, indication.reason)
+            assertEquals(AutomaticDriving.stop(), mod.drivingRule(decision))
+            assertFalse(mod.isFault(decision)) // Normal protected conflict, not a broken observation.
+            val upstream = Signal(1, 2, observation = Observation(Occupancy.Clear, true, true), type = T_A_011100000.TYPE)
+            assertEquals(Aspect.A, assertNotNull(mod.indication(assertNotNull(mod.decide(upstream, decision)))?.of(T_A_011100000.model)).aspect)
+        }
+        assertEquals(Aspect101000000.Closed, indication(approach))
+        assertEquals(Aspect101000000.Warning, indication(carre(Observation(Occupancy.Clear, true, true,
+            approachingTrain = approaching)))) // Known clear observations recover without a retained veto.
+        assertEquals(Aspect101000000.Closed, indication(approach.copy(observation = approach.observation.copy(approachingTrain = null))))
+    }
+
+    @Test fun conflictFreshnessAndRecoveryNeverManufactureClearanceForEitherCarre() {
+        val next = mod.evaluate(T_A_011100000.TYPE, emptyMap(),
+            Observation(Occupancy.Clear, true, true, next = Aspect.VL.ordinal))
+        for (type in listOf(T_C_101000000.TYPE, T_C_111000000.TYPE)) for (conflict in RouteConflict.entries) {
+            val observed = Observation(Occupancy.Unknown, true, false, approachingTrain = approaching,
+                routeConflict = conflict)
+            fun decide(observation: Observation) = assertNotNull(mod.decide(Signal(1, 2,
+                settings = if (type == T_C_101000000.TYPE) mapOf("active" to true) else emptyMap(),
+                observation = observation, type = type), next))
+            val restrictive = decide(observed)
+            assertEquals("Closed", mod.indication(restrictive)!!.aspect.name)
+            assertEquals("RouteConflict", mod.indication(restrictive)!!.reason.name)
+            assertFalse(mod.isFault(restrictive))
+            for (invalid in listOf(observed.copy(fresh = false), observed.copy(approachingTrain = 1))) {
+                val decision = decide(invalid)
+                assertEquals("Closed", mod.indication(decision)!!.aspect.name)
+                assertEquals("ObservationUnavailable", mod.indication(decision)!!.reason.name)
+                assertEquals(AutomaticDriving.stop(), mod.drivingRule(decision))
+                assertTrue(mod.isFault(decision))
+            }
+            val missingCause = decide(observed.copy(routeConflict = null))
+            assertEquals("Closed", mod.indication(missingCause)!!.aspect.name)
+            assertEquals("RouteUnknown", mod.indication(missingCause)!!.reason.name)
+            assertEquals(AutomaticDriving.stop(), mod.drivingRule(missingCause))
+            assertTrue(mod.isFault(missingCause))
+            val recovered = decide(observed.copy(routeConflict = null, routeKnown = true, block = Occupancy.Clear))
+            assertEquals(if (type == T_C_101000000.TYPE) "Warning" else "VL", mod.indication(recovered)!!.aspect.name)
+            assertFalse(mod.isFault(recovered))
+        }
     }
 
     @Test fun balRecognizesTheOtherTypeAndNeverTreatsCarreAsPermissiveStop() {
@@ -92,13 +150,13 @@ class SignalTypesTests {
     }
 
     @Test fun headEntryClosesCarreEvenWithAnotherTrainApproachingAndNoExitSignal() {
-        val approachingCarre = carre(Observation(Occupancy.Unknown, true, false,
-            approachingTrain = approaching)).copy(nextSignal = 0)
+        val approachingCarre = carre(Observation(Occupancy.Clear, true, true,
+            approachingTrain = approaching))
         assertEquals(Aspect101000000.Warning, indication(approachingCarre))
         // The leading head is downstream, its tail is still upstream. A second
         // approach must not reopen the signal while the known prefix is occupied.
-        val entered = approachingCarre.copy(observation = approachingCarre.observation.copy(
-            block = Occupancy.Occupied, approachingTrain = approaching + 1))
+        val entered = approachingCarre.copy(nextSignal = 0, observation = approachingCarre.observation.copy(
+            block = Occupancy.Occupied, routeKnown = false, approachingTrain = approaching + 1))
         val decision = assertNotNull(mod.decide(entered, null))
         assertEquals(Aspect101000000.Closed, mod.indication(decision)!!.aspect)
         assertEquals(AutomaticDriving.stop(), mod.drivingRule(decision))

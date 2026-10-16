@@ -5,9 +5,8 @@ import nimby.*
 /** Règles du Carré simple Avertissement, indépendantes du BAL.
  * Fermé au repos. L'approche est une observation en amont du SDK ; ni une
  * queue de train en aval ni le changement d'un voisin ne prouvent l'approche.
- * La fin de BAL est un usage possible, pas l'identité de ce modèle.
- * Politique de ce modèle : un aval inconnu est supposé libre. Le SDK conserve
- * son observation Unknown ; cette tolérance ne s'applique pas aux règles BAL. */
+ * La fin de BAL est un usage possible, pas l'identité de ce modèle. L'ouverture
+ * exige une limite aval connue et une occupation effectivement observée libre. */
 internal object Rules {
     fun decide(context: SignalRuleContext): Decision {
         fun closed(reason: Reason) = Decision(Aspect.Closed, reason)
@@ -17,12 +16,15 @@ internal object Rules {
         if (observation.lampFailed) return closed(Reason.LampFailure)
         if (!observation.fresh) return closed(Reason.ObservationUnavailable)
         if (observation.forcedStop) return closed(Reason.ForcedStop)
+        if (observation.routeConflict != null) return closed(Reason.RouteConflict)
         // Dès l'entrée de la tête dans la portion aval observée, refermer.
         // La queue peut encore être en amont et un autre train déjà annoncé :
         // cette occupation prime aussi quand aucune limite aval n'est connue.
         if (observation.block == Occupancy.Occupied) return closed(Reason.BlockOccupied)
-        // À la sortie du BAL, l'absence de frontière aval ne bloque pas
-        // l'ouverture. Une occupation réellement détectée reste prioritaire.
+        // Un parcours tronqué ou une présence inconnue ne prouve jamais libre
+        // la portion protégée, y compris en fin de BAL ou vers un terminus.
+        if (!observation.routeKnown) return closed(Reason.RouteUnknown)
+        if (observation.block != Occupancy.Clear) return closed(Reason.BlockUnknown)
         // Le SDK valide l'identifiant et la fraîcheur de l'approche. Le mod
         // choisit seulement si cette présence permet d'ouvrir le signal.
         if (!context.trainApproaching) return closed(Reason.AwaitingApproach)
