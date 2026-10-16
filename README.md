@@ -8,7 +8,7 @@ Le [wiki officiel du SDK](https://wiki-dev.nimbyrails-france.fr) enseigne la cr�
 de votre propre projet avec des exemples indépendants. AB Signalisation lumineuse est un produit,
 pas un projet exemple à télécharger pour apprendre le SDK.
 
-Pour tester la branche `master`, suivre [le protocole de test](TESTING.md) :
+Pour tester la branche `main`, suivre [le protocole de test](TESTING.md) :
 le kit Kotlin et le SDK d'exécution doivent provenir du même commit SDK épinglé.
 
 ## Mod, modèles et signaux posés
@@ -451,7 +451,7 @@ vers un kit Kotlin construit depuis cette branche du SDK, puis recharger Gradle.
 
 Les fichiers produits sont dans `build/gradle/mod/release`. Ces commandes ne
 lancent pas le jeu, n'installent pas le mod et ne publient rien.
-Les anciens prototypes restent dans l'historique Git. Sur `master`, GitHub Actions
+Les anciens prototypes restent dans l'historique Git. Sur `main`, GitHub Actions
 reconstruit le SDK épinglé et conserve des artefacts de test ; il ne publie aucune
 release. Les essais en jeu restent une validation distincte.
 

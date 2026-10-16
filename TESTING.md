@@ -1,4 +1,4 @@
-# Tester la branche master
+# Tester la branche main
 
 Cette branche prépare AB **0.2.0-alpha.8** avec le SDK **0.9.0-alpha.4**.
 Ces numéros ne suffisent pas à identifier les binaires de développement : utiliser
@@ -9,20 +9,20 @@ Aucune release ni mise à jour du catalogue public n'est déclenchée par ces es
 ## Récupérer et compiler
 
 ```powershell
-git clone --branch master https://github.com/NimbyRails-France/ab-signalisation-lumineuse.git
+git clone --branch main https://github.com/NimbyRails-France/ab-signalisation-lumineuse.git
 cd ab-signalisation-lumineuse
 $sdkRevision = (Get-Content .woodpecker/sdk-revision.txt).Trim()
 git clone https://github.com/NimbyRails-France/sdk.git ../sdk-test
 git -C ../sdk-test checkout --detach $sdkRevision
 ```
 
-Dans GitHub Actions, ouvrir **Master Windows validation** pour le commit AB à tester.
+Dans GitHub Actions, ouvrir **Main Windows validation** pour le commit AB à tester.
 Le workflow compile le SDK depuis ce pin, puis exécute les tests Windows sous Wine
 et la vérification de chargement d'AB. Un résultat réussi produit :
 
-- `ab-master-windows-test` : dossier assemblé du mod et identifiants des deux commits ;
-- `sdk-master-windows-test` : kit Kotlin et fichiers du runtime issus du même build ;
-- `master-verification-reports` : comptes rendus disponibles des vérifications.
+- `ab-main-windows-test` : dossier assemblé du mod et identifiants des deux commits ;
+- `sdk-main-windows-test` : kit Kotlin et fichiers du runtime issus du même build ;
+- `main-verification-reports` : comptes rendus disponibles des vérifications.
 
 Ces artefacts sont des fichiers de développement, pas des installateurs ou des
 releases. Les tests sous Wine ne remplacent pas un essai dans NIMBY Rails.

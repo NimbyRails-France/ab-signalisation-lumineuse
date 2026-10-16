@@ -1,16 +1,17 @@
 # Test artifacts only. This workflow does not publish a release or a Hub catalogue.
-name: Master Windows validation
+name: Main Windows validation
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: master-windows-validation-${{ github.ref }}
+  group: main-windows-validation-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   validate:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     container: ubuntu:24.04
     timeout-minutes: 120
@@ -57,7 +58,7 @@ jobs:
       - name: Preserve verified AB files for testing
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ab-master-windows-test
+          name: ab-main-windows-test
           path: |
             build/gradle/mod/release/
             build/gradle/ab-source-revision.txt
@@ -67,7 +68,7 @@ jobs:
       - name: Preserve the matching SDK kit and runtime
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: sdk-master-windows-test
+          name: sdk-main-windows-test
           path: |
             .ci/sdk/build/kotlin-kit/
             .ci/sdk/build/install/bin/
@@ -79,7 +80,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: master-verification-reports
+          name: main-verification-reports
           path: |
             build/gradle/reports/
             build/gradle/test-results/
